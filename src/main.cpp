@@ -4,7 +4,8 @@
 #include <random>
 #include <iostream>
 
-// Grailsort implementation can be found at https://github.com/HolyGrailSortProject/Rewritten-Grailsort
+// Grailsort implementation provided by Morwenn.
+// Original code at https://github.com/HolyGrailSortProject/Rewritten-Grailsort
 #include "grailsort.h"
 
 struct GameData {
@@ -25,7 +26,6 @@ struct GameData {
 
 int main() {
     using namespace std::chrono;
-
     std::random_device rd;
     std::mt19937 generator(rd());
     std::uniform_real_distribution<float> reviewDistrib(1, 5);
