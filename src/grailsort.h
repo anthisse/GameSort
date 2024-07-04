@@ -51,6 +51,13 @@
 #define REWRITTEN_GRAILSORT_H_
 
 ////////////////////////////////////////////////////////////
+// Suppress warnings
+////////////////////////////////////////////////////////////
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
+////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
 #include <algorithm>
@@ -60,27 +67,22 @@
 #include <utility>
 
 
-namespace grailsort_detail
-{
+namespace grailsort_detail {
     // Credit to phoenixbound for this clever idea
-    enum struct Subarray
-    {
+    enum struct Subarray {
         LEFT,
         RIGHT
     };
 
     template<typename Compare>
-    struct ThreeWayCompare
-    {
+    struct ThreeWayCompare {
         Compare compare;
 
-        explicit ThreeWayCompare(Compare&& comp):
-            compare(std::forward<Compare>(comp))
-        {}
+        explicit ThreeWayCompare(Compare &&comp): compare(std::forward<Compare>(comp)) {
+        }
 
         template<typename T, typename U>
-        int operator()(T&& lhs, U&& rhs)
-        {
+        int operator()(T &&lhs, U &&rhs) {
             if (compare(lhs, rhs)) {
                 return -1;
             }
@@ -91,8 +93,7 @@ namespace grailsort_detail
         }
     };
 
-    struct GrailSort
-    {
+    struct GrailSort {
         int currBlockLen;
         Subarray currBlockOrigin;
 
@@ -105,13 +106,12 @@ namespace grailsort_detail
         // Variant of the Gries-Mills algorithm, which is basically recursive block swaps
         template<typename RandomAccessIterator>
         static void Rotate(RandomAccessIterator array, int start, int leftLen, int rightLen) {
-            while(leftLen > 0 && rightLen > 0) {
-                if(leftLen <= rightLen) {
+            while (leftLen > 0 && rightLen > 0) {
+                if (leftLen <= rightLen) {
                     BlockSwap(array, start, start + leftLen, leftLen);
                     start += leftLen;
                     rightLen -= leftLen;
-                }
-                else {
+                } else {
                     BlockSwap(array, start + leftLen - rightLen, start + leftLen, rightLen);
                     leftLen -= rightLen;
                 }
@@ -122,11 +122,11 @@ namespace grailsort_detail
         // Also known as "Optimized Gnomesort".
         template<typename RandomAccessIterator, typename Compare>
         static void InsertSort(RandomAccessIterator array, int start, int length, Compare comp) {
-            for(int item = 1; item < length; item++) {
-                int left  = start + item - 1;
+            for (int item = 1; item < length; item++) {
+                int left = start + item - 1;
                 int right = start + item;
 
-                while(left >= start && comp(array[left], array[right]) > 0) {
+                while (left >= start && comp(array[left], array[right]) > 0) {
                     std::iter_swap(array + left, array + right);
                     left--;
                     right--;
@@ -135,18 +135,17 @@ namespace grailsort_detail
         }
 
         template<typename RandomAccessIterator, typename Compare, typename T>
-        static int BinarySearchLeft(RandomAccessIterator array, int start, int length, const T& target, Compare comp) {
-            int left  = 0;
+        static int BinarySearchLeft(RandomAccessIterator array, int start, int length, const T &target, Compare comp) {
+            int left = 0;
             int right = length;
 
-            while(left < right) {
+            while (left < right) {
                 // equivalent to (left + right) / 2 with added overflow protection
                 int middle = left + ((right - left) / 2);
 
-                if(comp(array[start + middle], target) < 0) {
+                if (comp(array[start + middle], target) < 0) {
                     left = middle + 1;
-                }
-                else {
+                } else {
                     right = middle;
                 }
             }
@@ -155,17 +154,16 @@ namespace grailsort_detail
 
         // Credit to Anonymous0726 for debugging
         template<typename RandomAccessIterator, typename Compare, typename T>
-        static int BinarySearchRight(RandomAccessIterator array, int start, int length, const T& target, Compare comp) {
-            int left  = 0;
+        static int BinarySearchRight(RandomAccessIterator array, int start, int length, const T &target, Compare comp) {
+            int left = 0;
             int right = length;
 
-            while(left < right) {
+            while (left < right) {
                 // equivalent to (left + right) / 2 with added overflow protection
                 int middle = left + ((right - left) / 2);
-                if(comp(array[start + middle], target) > 0) {
+                if (comp(array[start + middle], target) > 0) {
                     right = middle;
-                }
-                else {
+                } else {
                     left = middle + 1;
                 }
             }
@@ -176,12 +174,11 @@ namespace grailsort_detail
         // cost: 2 * length + idealKeys^2 / 2
         template<typename RandomAccessIterator, typename Compare>
         static int CollectKeys(RandomAccessIterator array, int start, int length, int idealKeys, Compare comp) {
-            int keysFound  = 1; // by itself, the first item in the array is our first unique key
-            int firstKey   = 0; // the first item in the array is at the first position in the array
+            int keysFound = 1; // by itself, the first item in the array is our first unique key
+            int firstKey = 0; // the first item in the array is at the first position in the array
             int currKey = 1; // the index used for finding potentially unique items ("keys") in the array
 
-            while(currKey < length && keysFound < idealKeys) {
-
+            while (currKey < length && keysFound < idealKeys) {
                 // Find the location in the key-buffer where our current key can be inserted in sorted order.
                 // If the key at insertPos is equal to currKey, then currKey isn't unique and we move on.
                 int insertPos = BinarySearchLeft(array, start + firstKey, keysFound, array[start + currKey], comp);
@@ -189,8 +186,7 @@ namespace grailsort_detail
                 // The second part of this conditional does the equal check we were just talking about; however,
                 // if currKey is larger than everything in the key-buffer (meaning insertPos == keysFound),
                 // then that also tells us it wasn't *equal* to anything in the key-buffer. Magic! :)
-                if(insertPos == keysFound || comp(array[start + currKey], array[start + firstKey + insertPos]) != 0) {
-
+                if (insertPos == keysFound || comp(array[start + currKey], array[start + firstKey + insertPos]) != 0) {
                     // First, rotate the key-buffer over to currKey's immediate left...
                     // (this helps save a TON of swaps/writes!!!)
                     Rotate(array, start + firstKey, keysFound, currKey - (firstKey + keysFound));
@@ -217,22 +213,21 @@ namespace grailsort_detail
         template<typename RandomAccessIterator, typename Compare>
         static void PairwiseSwaps(RandomAccessIterator array, int start, int length, Compare comp) {
             int index;
-            for(index = 1; index < length; index += 2) {
-                int  left = start + index - 1;
+            for (index = 1; index < length; index += 2) {
+                int left = start + index - 1;
                 int right = start + index;
 
-                if(comp(array[left], array[right]) > 0) {
+                if (comp(array[left], array[right]) > 0) {
                     std::swap(array[left - 2], array[right]);
                     std::swap(array[right - 2], array[left]);
-                }
-                else {
+                } else {
                     std::swap(array[left - 2], array[left]);
                     std::swap(array[right - 2], array[right]);
                 }
             }
 
             int left = start + index - 1;
-            if(left < start + length) {
+            if (left < start + length) {
                 std::swap(array[left - 2], array[left]);
             }
         }
@@ -240,22 +235,21 @@ namespace grailsort_detail
         template<typename RandomAccessIterator, typename Compare>
         static void PairwiseWrites(RandomAccessIterator array, int start, int length, Compare comp) {
             int index;
-            for(index = 1; index < length; index += 2) {
-                int  left = start + index - 1;
+            for (index = 1; index < length; index += 2) {
+                int left = start + index - 1;
                 int right = start + index;
 
-                if(comp(array[left], array[right]) > 0) {
+                if (comp(array[left], array[right]) > 0) {
                     array[left - 2] = std::move(array[right]);
                     array[right - 2] = std::move(array[left]);
-                }
-                else {
+                } else {
                     array[left - 2] = std::move(array[left]);
                     array[right - 2] = std::move(array[right]);
                 }
             }
 
             int left = start + index - 1;
-            if(left < start + length) {
+            if (left < start + length) {
                 array[left - 2] = std::move(array[left]);
             }
         }
@@ -265,59 +259,58 @@ namespace grailsort_detail
         // "scrolling buffer" + array[start, middle - 1] + array[middle, end - 1]
         // --> array[buffer, buffer + end - 1] + "scrolling buffer"
         template<typename RandomAccessIterator, typename Compare>
-        static void MergeForwards(RandomAccessIterator array, int start, int leftLen, int rightLen, int bufferOffset, Compare comp) {
+        static void MergeForwards(RandomAccessIterator array, int start, int leftLen, int rightLen, int bufferOffset,
+                                  Compare comp) {
             auto buffer = array + (start - bufferOffset);
             auto left = array + start;
             auto middle = array + (start + leftLen);
             auto right = middle;
             auto end = middle + rightLen;
 
-            while(right != end) {
-                if(left == middle || comp(*left, *right) > 0) {
+            while (right != end) {
+                if (left == middle || comp(*left, *right) > 0) {
                     std::iter_swap(buffer, right);
                     ++right;
-                }
-                else {
+                } else {
                     std::iter_swap(buffer, left);
                     ++left;
                 }
                 ++buffer;
             }
 
-            if(buffer != left) {
+            if (buffer != left) {
                 std::swap_ranges(buffer, buffer + (middle - left), left);
             }
         }
 
         // credit to 666666t for thorough bug-checking/fixing
         template<typename RandomAccessIterator, typename Compare>
-        static void MergeBackwards(RandomAccessIterator array, int start, int leftLen, int rightLen, int bufferOffset, Compare comp) {
+        static void MergeBackwards(RandomAccessIterator array, int start, int leftLen, int rightLen, int bufferOffset,
+                                   Compare comp) {
             // used to be '= start'
-            int    end = start  -  1;
+            int end = start - 1;
             // used to be '= start + leftLen - 1'
-            int   left = end    +  leftLen;
+            int left = end + leftLen;
             int middle = left;
             // OFF-BY-ONE BUG FIXED: used to be `int  right = middle + rightLen - 1;`
-            int  right = middle + rightLen;
+            int right = middle + rightLen;
             // OFF-BY-ONE BUG FIXED: used to be `int buffer = right  + bufferOffset - 1;`
-            int buffer = right  + bufferOffset;
+            int buffer = right + bufferOffset;
 
             // used to be 'left >= end'
-            while(left > end) {
-                if(right == middle || comp(array[left], array[right]) > 0) {
-
+            while (left > end) {
+                if (right == middle || comp(array[left], array[right]) > 0) {
                     std::swap(array[buffer], array[left]);
                     left--;
-                }
-                else {
+                } else {
                     std::swap(array[buffer], array[right]);
                     right--;
                 }
                 buffer--;
             }
 
-            if(right != buffer) {
-                while(right > middle) {
+            if (right != buffer) {
+                while (right > middle) {
                     std::swap(array[buffer], array[right]);
                     buffer--;
                     right--;
@@ -332,27 +325,27 @@ namespace grailsort_detail
         //
         // FUNCTION RENAMED: More consistent with "out-of-place" being at the end
         template<typename RandomAccessIterator, typename Compare>
-        static void MergeOutOfPlace(RandomAccessIterator array, int start, int leftLen, int rightLen, int bufferOffset, Compare comp) {
-            int buffer = start  - bufferOffset;
-            int   left = start;
-            int middle = start  +  leftLen;
-            int  right = middle;
-            int    end = middle + rightLen;
+        static void MergeOutOfPlace(RandomAccessIterator array, int start, int leftLen, int rightLen, int bufferOffset,
+                                    Compare comp) {
+            int buffer = start - bufferOffset;
+            int left = start;
+            int middle = start + leftLen;
+            int right = middle;
+            int end = middle + rightLen;
 
-            while(right < end) {
-                if(left == middle || comp(array[left], array[right]) > 0) {
+            while (right < end) {
+                if (left == middle || comp(array[left], array[right]) > 0) {
                     array[buffer] = std::move(array[right]);
                     right++;
-                }
-                else {
+                } else {
                     array[buffer] = std::move(array[left]);
                     left++;
                 }
                 buffer++;
             }
 
-            if(buffer != left) {
-                while(left < middle) {
+            if (buffer != left) {
+                while (left < middle) {
                     array[buffer] = std::move(array[left]);
                     buffer++;
                     left++;
@@ -361,42 +354,41 @@ namespace grailsort_detail
         }
 
         template<typename RandomAccessIterator, typename Compare>
-        static void BuildInPlace(RandomAccessIterator array, int start, int length, int currentLen, int bufferLen, Compare comp) {
-            for(int mergeLen = currentLen; mergeLen < bufferLen; mergeLen *= 2) {
+        static void BuildInPlace(RandomAccessIterator array, int start, int length, int currentLen, int bufferLen,
+                                 Compare comp) {
+            for (int mergeLen = currentLen; mergeLen < bufferLen; mergeLen *= 2) {
                 int fullMerge = 2 * mergeLen;
 
                 int mergeIndex;
                 int mergeEnd = start + length - fullMerge;
                 int bufferOffset = mergeLen;
 
-                for(mergeIndex = start; mergeIndex <= mergeEnd; mergeIndex += fullMerge) {
+                for (mergeIndex = start; mergeIndex <= mergeEnd; mergeIndex += fullMerge) {
                     MergeForwards(array, mergeIndex, mergeLen, mergeLen, bufferOffset, comp);
                 }
 
                 int leftOver = length - (mergeIndex - start);
 
-                if(leftOver > mergeLen) {
+                if (leftOver > mergeLen) {
                     MergeForwards(array, mergeIndex, mergeLen, leftOver - mergeLen, bufferOffset, comp);
-                }
-                else {
+                } else {
                     Rotate(array, mergeIndex - mergeLen, mergeLen, leftOver);
                 }
 
                 start -= mergeLen;
             }
 
-            int fullMerge   = 2 * bufferLen;
-            int lastBlock  = length % fullMerge;
+            int fullMerge = 2 * bufferLen;
+            int lastBlock = length % fullMerge;
             int lastOffset = start + length - lastBlock;
 
-            if(lastBlock <= bufferLen) {
+            if (lastBlock <= bufferLen) {
                 Rotate(array, lastOffset, lastBlock, bufferLen);
-            }
-            else {
+            } else {
                 MergeBackwards(array, lastOffset, bufferLen, lastBlock - bufferLen, bufferLen, comp);
             }
 
-            for(int mergeIndex = lastOffset - fullMerge; mergeIndex >= start; mergeIndex -= fullMerge) {
+            for (int mergeIndex = lastOffset - fullMerge; mergeIndex >= start; mergeIndex -= fullMerge) {
                 MergeBackwards(array, mergeIndex, bufferLen, bufferLen, bufferLen, comp);
             }
         }
@@ -410,23 +402,22 @@ namespace grailsort_detail
             start -= 2;
 
             int mergeLen;
-            for(mergeLen = 2; mergeLen < extLen; mergeLen *= 2) {
+            for (mergeLen = 2; mergeLen < extLen; mergeLen *= 2) {
                 int fullMerge = 2 * mergeLen;
 
                 int mergeIndex;
                 int mergeEnd = start + length - fullMerge;
                 int bufferOffset = mergeLen;
 
-                for(mergeIndex = start; mergeIndex <= mergeEnd; mergeIndex += fullMerge) {
+                for (mergeIndex = start; mergeIndex <= mergeEnd; mergeIndex += fullMerge) {
                     MergeOutOfPlace(array, mergeIndex, mergeLen, mergeLen, bufferOffset, comp);
                 }
 
                 int leftOver = length - (mergeIndex - start);
 
-                if(leftOver > mergeLen) {
+                if (leftOver > mergeLen) {
                     MergeOutOfPlace(array, mergeIndex, mergeLen, leftOver - mergeLen, bufferOffset, comp);
-                }
-                else {
+                } else {
                     // MINOR CHANGE: Used to be a loop; much clearer now
                     std::move(array + mergeIndex, array + (mergeIndex + leftOver), array + (mergeIndex - mergeLen));
                 }
@@ -444,23 +435,21 @@ namespace grailsort_detail
         template<typename RandomAccessIterator, typename BufferIterator, typename Compare>
         void BuildBlocks(RandomAccessIterator array, int start, int length, int bufferLen,
                          BufferIterator extBuffer, int extBufferLen, Compare comp) {
-            if(extBufferLen != 0) {
+            if (extBufferLen != 0) {
                 int extLen;
 
-                if(bufferLen < extBufferLen) {
+                if (bufferLen < extBufferLen) {
                     extLen = bufferLen;
-                }
-                else {
+                } else {
                     // max power of 2 -- just in case
                     extLen = 1;
-                    while((extLen * 2) <= extBufferLen) {
+                    while ((extLen * 2) <= extBufferLen) {
                         extLen *= 2;
                     }
                 }
 
                 BuildOutOfPlace(array, start, length, bufferLen, extLen, extBuffer, comp);
-            }
-            else {
+            } else {
                 PairwiseSwaps(array, start, length, comp);
                 BuildInPlace(array, start - 2, length, 2, bufferLen, comp);
             }
@@ -468,21 +457,22 @@ namespace grailsort_detail
 
         // Returns the final position of 'medianKey'
         template<typename RandomAccessIterator, typename Compare>
-        static int BlockSelectSort(RandomAccessIterator array, int firstKey, int start, int medianKey, int blockCount, int blockLen, Compare comp) {
-            for(int firstBlock = 0; firstBlock < blockCount; firstBlock++) {
+        static int BlockSelectSort(RandomAccessIterator array, int firstKey, int start, int medianKey, int blockCount,
+                                   int blockLen, Compare comp) {
+            for (int firstBlock = 0; firstBlock < blockCount; firstBlock++) {
                 int selectBlock = firstBlock;
 
-                for(int currBlock = firstBlock + 1; currBlock < blockCount; currBlock++) {
+                for (int currBlock = firstBlock + 1; currBlock < blockCount; currBlock++) {
                     int compare = comp(array[start + (currBlock * blockLen)],
                                        array[start + (selectBlock * blockLen)]);
 
-                    if(compare < 0 || (compare == 0 && comp(array[firstKey + currBlock],
-                                                            array[firstKey + selectBlock]) < 0)) {
+                    if (compare < 0 || (compare == 0 && comp(array[firstKey + currBlock],
+                                                             array[firstKey + selectBlock]) < 0)) {
                         selectBlock = currBlock;
                     }
                 }
 
-                if(selectBlock != firstBlock) {
+                if (selectBlock != firstBlock) {
                     // Swap the left and right selected blocks...
                     BlockSwap(array, start + (firstBlock * blockLen), start + (selectBlock * blockLen), blockLen);
 
@@ -493,10 +483,9 @@ namespace grailsort_detail
 
                     // ORIGINAL LOC: if(midkey==u-1 || midkey==p) midkey^=(u-1)^p;
                     // MASSIVE, MASSIVE credit to lovebuny for figuring this one out!
-                    if(medianKey == firstBlock) {
+                    if (medianKey == firstBlock) {
                         medianKey = selectBlock;
-                    }
-                    else if(medianKey == selectBlock) {
+                    } else if (medianKey == selectBlock) {
                         medianKey = firstBlock;
                     }
                 }
@@ -512,10 +501,10 @@ namespace grailsort_detail
         // RESTRUCTED, BETTER NAMES: 'resetLen' is now 'length' and 'bufferLen' is now 'bufferOffset'
         template<typename RandomAccessIterator>
         static void InPlaceBufferReset(RandomAccessIterator array, int start, int length, int bufferOffset) {
-            int  index = start + length - 1;
+            int index = start + length - 1;
             int buffer = index - bufferOffset;
 
-            while(index >= start) {
+            while (index >= start) {
                 std::swap(array[index], array[buffer]);
                 index--;
                 buffer--;
@@ -530,10 +519,10 @@ namespace grailsort_detail
         // RESTRUCTED, BETTER NAMES: 'resetLen' is now 'length' and 'bufferLen' is now 'bufferOffset'
         template<typename RandomAccessIterator>
         static void OutOfPlaceBufferReset(RandomAccessIterator array, int start, int length, int bufferOffset) {
-            int  index = start + length - 1;
+            int index = start + length - 1;
             int buffer = index - bufferOffset;
 
-            while(index >= start) {
+            while (index >= start) {
                 array[index] = std::move(array[buffer]);
                 index--;
                 buffer--;
@@ -549,7 +538,7 @@ namespace grailsort_detail
         //                                              middle of the merge while the buffer is at the end
         template<typename RandomAccessIterator>
         static void InPlaceBufferRewind(RandomAccessIterator array, int start, int leftBlock, int buffer) {
-            while(leftBlock >= start) {
+            while (leftBlock >= start) {
                 std::swap(array[buffer], array[leftBlock]);
                 leftBlock--;
                 buffer--;
@@ -565,7 +554,7 @@ namespace grailsort_detail
         //                                                        the middle, and `buffer` should be the end
         template<typename RandomAccessIterator>
         static void OutOfPlaceBufferRewind(RandomAccessIterator array, int start, int leftBlock, int buffer) {
-            while(leftBlock >= start) {
+            while (leftBlock >= start) {
                 array[buffer] = std::move(array[leftBlock]);
                 leftBlock--;
                 buffer--;
@@ -574,23 +563,23 @@ namespace grailsort_detail
 
         template<typename RandomAccessIterator, typename Compare>
         static Subarray GetSubarray(RandomAccessIterator array, int currKey, int medianKey, Compare comp) {
-            if(comp(array[currKey], array[medianKey]) < 0) {
+            if (comp(array[currKey], array[medianKey]) < 0) {
                 return Subarray::LEFT;
-            }
-            else {
+            } else {
                 return Subarray::RIGHT;
             }
         }
 
         // FUNCTION RE-RENAMED: last/final left blocks are used to calculate the length of the final merge
         template<typename RandomAccessIterator, typename Compare>
-        static int CountLastMergeBlocks(RandomAccessIterator array, int offset, int blockCount, int blockLen, Compare comp) {
+        static int CountLastMergeBlocks(RandomAccessIterator array, int offset, int blockCount, int blockLen,
+                                        Compare comp) {
             int blocksToMerge = 0;
 
             int lastRightFrag = offset + (blockCount * blockLen);
-            int   prevLeftBlock = lastRightFrag - blockLen;
+            int prevLeftBlock = lastRightFrag - blockLen;
 
-            while(blocksToMerge < blockCount && comp(array[lastRightFrag], array[prevLeftBlock]) < 0) {
+            while (blocksToMerge < blockCount && comp(array[lastRightFrag], array[prevLeftBlock]) < 0) {
                 blocksToMerge++;
                 prevLeftBlock -= blockLen;
             }
@@ -599,33 +588,31 @@ namespace grailsort_detail
         }
 
         template<typename RandomAccessIterator, typename Compare>
-        void SmartMerge(RandomAccessIterator array, int start, int leftLen, Subarray leftOrigin, int rightLen, int bufferOffset, Compare comp) {
+        void SmartMerge(RandomAccessIterator array, int start, int leftLen, Subarray leftOrigin, int rightLen,
+                        int bufferOffset, Compare comp) {
             auto buffer = array + (start - bufferOffset);
             auto left = array + start;
             auto middle = left + leftLen;
             auto right = middle;
             auto end = middle + rightLen;
 
-            if(leftOrigin == Subarray::LEFT) {
-                while(left != middle && right != end) {
-                    if(comp(*left, *right) <= 0) {
+            if (leftOrigin == Subarray::LEFT) {
+                while (left != middle && right != end) {
+                    if (comp(*left, *right) <= 0) {
                         std::iter_swap(buffer, left);
                         ++left;
-                    }
-                    else {
+                    } else {
                         std::iter_swap(buffer, right);
                         ++right;
                     }
                     ++buffer;
                 }
-            }
-            else {
-                while(left != middle && right != end) {
-                    if(comp(*left, *right) <  0) {
+            } else {
+                while (left != middle && right != end) {
+                    if (comp(*left, *right) < 0) {
                         std::iter_swap(buffer, left);
                         ++left;
-                    }
-                    else {
+                    } else {
                         std::iter_swap(buffer, right);
                         ++right;
                     }
@@ -633,17 +620,15 @@ namespace grailsort_detail
                 }
             }
 
-            if(left < middle) {
+            if (left < middle) {
                 this->currBlockLen = middle - left;
                 // UPDATED ARGUMENTS: 'middle' and 'end' now 'middle - 1' and 'end - 1'
                 InPlaceBufferRewind(array, left - array, (middle - array) - 1, (end - array) - 1);
-            }
-            else {
+            } else {
                 this->currBlockLen = end - right;
-                if(leftOrigin == Subarray::LEFT) {
+                if (leftOrigin == Subarray::LEFT) {
                     this->currBlockOrigin = Subarray::RIGHT;
-                }
-                else {
+                } else {
                     this->currBlockOrigin = Subarray::LEFT;
                 }
             }
@@ -651,100 +636,95 @@ namespace grailsort_detail
 
         // MINOR CHANGE: better naming -- 'insertPos' is now 'mergeLen' -- and "middle" calculation simplified
         template<typename RandomAccessIterator, typename Compare>
-        void SmartLazyMerge(RandomAccessIterator array, int start, int leftLen, Subarray leftOrigin, int rightLen, Compare comp) {
+        void SmartLazyMerge(RandomAccessIterator array, int start, int leftLen, Subarray leftOrigin, int rightLen,
+                            Compare comp) {
             int middle = start + leftLen;
 
-            if(leftOrigin == Subarray::LEFT) {
-                if(comp(array[middle - 1], array[middle]) >  0) {
-                    while(leftLen != 0) {
+            if (leftOrigin == Subarray::LEFT) {
+                if (comp(array[middle - 1], array[middle]) > 0) {
+                    while (leftLen != 0) {
                         int mergeLen = BinarySearchLeft(array, middle, rightLen, array[start], comp);
 
-                        if(mergeLen != 0) {
+                        if (mergeLen != 0) {
                             Rotate(array, start, leftLen, mergeLen);
-                            start    += mergeLen;
+                            start += mergeLen;
                             rightLen -= mergeLen;
                         }
 
                         middle += mergeLen;
 
-                        if(rightLen == 0) {
+                        if (rightLen == 0) {
                             this->currBlockLen = leftLen;
                             return;
-                        }
-                        else {
+                        } else {
                             do {
                                 start++;
                                 leftLen--;
-                            } while(leftLen != 0 && comp(array[start], array[middle]) <= 0);
+                            } while (leftLen != 0 && comp(array[start], array[middle]) <= 0);
                         }
                     }
                 }
-            }
-            else {
-                if(comp(array[middle - 1], array[middle]) >= 0) {
-                    while(leftLen != 0) {
+            } else {
+                if (comp(array[middle - 1], array[middle]) >= 0) {
+                    while (leftLen != 0) {
                         int mergeLen = BinarySearchRight(array, start + leftLen, rightLen, array[start], comp);
 
-                        if(mergeLen != 0) {
+                        if (mergeLen != 0) {
                             Rotate(array, start, leftLen, mergeLen);
-                            start    += mergeLen;
+                            start += mergeLen;
                             rightLen -= mergeLen;
                         }
 
                         middle += mergeLen;
 
-                        if(rightLen == 0) {
+                        if (rightLen == 0) {
                             this->currBlockLen = leftLen;
                             return;
-                        }
-                        else {
+                        } else {
                             do {
                                 start++;
                                 leftLen--;
-                            } while(leftLen != 0 && comp(array[start], array[middle]) < 0);
+                            } while (leftLen != 0 && comp(array[start], array[middle]) < 0);
                         }
                     }
                 }
             }
 
             this->currBlockLen = rightLen;
-            if(leftOrigin == Subarray::LEFT) {
+            if (leftOrigin == Subarray::LEFT) {
                 this->currBlockOrigin = Subarray::RIGHT;
-            }
-            else {
+            } else {
                 this->currBlockOrigin = Subarray::LEFT;
             }
         }
 
         // FUNCTION RENAMED: more consistent with other "out-of-place" merges
         template<typename RandomAccessIterator, typename Compare>
-        void SmartMergeOutOfPlace(RandomAccessIterator array, int start, int leftLen, Subarray leftOrigin, int rightLen, int bufferOffset, Compare comp) {
-            int buffer = start  - bufferOffset;
-            int   left = start;
-            int middle = start  +  leftLen;
-            int  right = middle;
-            int    end = middle + rightLen;
+        void SmartMergeOutOfPlace(RandomAccessIterator array, int start, int leftLen, Subarray leftOrigin, int rightLen,
+                                  int bufferOffset, Compare comp) {
+            int buffer = start - bufferOffset;
+            int left = start;
+            int middle = start + leftLen;
+            int right = middle;
+            int end = middle + rightLen;
 
-            if(leftOrigin == Subarray::LEFT) {
-                while(left < middle && right < end) {
-                    if(comp(array[left], array[right]) <= 0) {
+            if (leftOrigin == Subarray::LEFT) {
+                while (left < middle && right < end) {
+                    if (comp(array[left], array[right]) <= 0) {
                         array[buffer] = std::move(array[left]);
                         left++;
-                    }
-                    else {
+                    } else {
                         array[buffer] = std::move(array[right]);
                         right++;
                     }
                     buffer++;
                 }
-            }
-            else {
-                while(left < middle && right < end) {
-                    if(comp(array[left], array[right]) <  0) {
+            } else {
+                while (left < middle && right < end) {
+                    if (comp(array[left], array[right]) < 0) {
                         array[buffer] = std::move(array[left]);
                         left++;
-                    }
-                    else {
+                    } else {
                         array[buffer] = std::move(array[right]);
                         right++;
                     }
@@ -752,17 +732,15 @@ namespace grailsort_detail
                 }
             }
 
-            if(left < middle) {
+            if (left < middle) {
                 this->currBlockLen = middle - left;
                 // UPDATED ARGUMENTS: 'middle' and 'end' now 'middle - 1' and 'end - 1'
                 OutOfPlaceBufferRewind(array, left, middle - 1, end - 1);
-            }
-            else {
+            } else {
                 this->currBlockLen = end - right;
-                if(leftOrigin == Subarray::LEFT) {
+                if (leftOrigin == Subarray::LEFT) {
                     this->currBlockOrigin = Subarray::RIGHT;
-                }
-                else {
+                } else {
                     this->currBlockOrigin = Subarray::LEFT;
                 }
             }
@@ -771,28 +749,28 @@ namespace grailsort_detail
         // Credit to Anonymous0726 for better variable names such as "nextBlock"
         // Also minor change: removed unnecessary "currBlock = nextBlock" lines
         template<typename RandomAccessIterator, typename Compare>
-        void MergeBlocks(RandomAccessIterator array, int firstKey, int medianKey, int start, int blockCount, int blockLen,
+        void MergeBlocks(RandomAccessIterator array, int firstKey, int medianKey, int start, int blockCount,
+                         int blockLen,
                          int lastMergeBlocks, int lastLen, Compare comp) {
             int buffer;
 
             int currBlock;
             int nextBlock = start + blockLen;
 
-            this->currBlockLen    = blockLen;
+            this->currBlockLen = blockLen;
             this->currBlockOrigin = GetSubarray(array, firstKey, medianKey, comp);
 
             Subarray nextBlockOrigin;
-            for(int keyIndex = 1; keyIndex < blockCount; keyIndex++, nextBlock += blockLen) {
+            for (int keyIndex = 1; keyIndex < blockCount; keyIndex++, nextBlock += blockLen) {
                 currBlock = nextBlock - this->currBlockLen;
                 nextBlockOrigin = GetSubarray(array, firstKey + keyIndex, medianKey, comp);
 
-                if(nextBlockOrigin == this->currBlockOrigin) {
+                if (nextBlockOrigin == this->currBlockOrigin) {
                     buffer = currBlock - blockLen;
 
                     BlockSwap(array, buffer, currBlock, this->currBlockLen);
                     this->currBlockLen = blockLen;
-                }
-                else {
+                } else {
                     SmartMerge(array, currBlock, this->currBlockLen, this->currBlockOrigin, blockLen, blockLen, comp);
                 }
             }
@@ -800,46 +778,44 @@ namespace grailsort_detail
             currBlock = nextBlock - this->currBlockLen;
             buffer = currBlock - blockLen;
 
-            if(lastLen != 0) {
-                if(this->currBlockOrigin == Subarray::RIGHT) {
+            if (lastLen != 0) {
+                if (this->currBlockOrigin == Subarray::RIGHT) {
                     BlockSwap(array, buffer, currBlock, this->currBlockLen);
 
                     currBlock = nextBlock;
-                    this->currBlockLen    = blockLen * lastMergeBlocks;
+                    this->currBlockLen = blockLen * lastMergeBlocks;
                     this->currBlockOrigin = Subarray::LEFT;
-                }
-                else {
+                } else {
                     this->currBlockLen += blockLen * lastMergeBlocks;
                 }
 
                 MergeForwards(array, currBlock, this->currBlockLen, lastLen, blockLen, comp);
-            }
-            else {
+            } else {
                 BlockSwap(array, buffer, currBlock, this->currBlockLen);
             }
         }
 
         template<typename RandomAccessIterator, typename Compare>
-        void LazyMergeBlocks(RandomAccessIterator array, int firstKey, int medianKey, int start, int blockCount, int blockLen,
+        void LazyMergeBlocks(RandomAccessIterator array, int firstKey, int medianKey, int start, int blockCount,
+                             int blockLen,
                              int lastMergeBlocks, int lastLen, Compare comp) {
             int currBlock;
             int nextBlock = start + blockLen;
 
-            this->currBlockLen    = blockLen;
+            this->currBlockLen = blockLen;
             this->currBlockOrigin = GetSubarray(array, firstKey, medianKey, comp);
 
             Subarray nextBlockOrigin;
-            for(int keyIndex = 1; keyIndex < blockCount; keyIndex++, nextBlock += blockLen) {
+            for (int keyIndex = 1; keyIndex < blockCount; keyIndex++, nextBlock += blockLen) {
                 currBlock = nextBlock - this->currBlockLen;
 
                 nextBlockOrigin = GetSubarray(array, firstKey + keyIndex, medianKey, comp);
 
-                if(nextBlockOrigin == this->currBlockOrigin) {
+                if (nextBlockOrigin == this->currBlockOrigin) {
                     this->currBlockLen = blockLen;
-                }
-                else {
+                } else {
                     // These checks were included in the original code... but why???
-                    if(blockLen != 0 && this->currBlockLen != 0) {
+                    if (blockLen != 0 && this->currBlockLen != 0) {
                         SmartLazyMerge(array, currBlock, this->currBlockLen, this->currBlockOrigin, blockLen, comp);
                     }
                 }
@@ -847,13 +823,12 @@ namespace grailsort_detail
 
             currBlock = nextBlock - this->currBlockLen;
 
-            if(lastLen != 0) {
-                if(this->currBlockOrigin == Subarray::RIGHT) {
+            if (lastLen != 0) {
+                if (this->currBlockOrigin == Subarray::RIGHT) {
                     currBlock = nextBlock;
-                    this->currBlockLen    = blockLen * lastMergeBlocks;
+                    this->currBlockLen = blockLen * lastMergeBlocks;
                     this->currBlockOrigin = Subarray::LEFT;
-                }
-                else {
+                } else {
                     this->currBlockLen += blockLen * lastMergeBlocks;
                 }
 
@@ -862,60 +837,61 @@ namespace grailsort_detail
         }
 
         template<typename RandomAccessIterator, typename Compare>
-        void MergeBlocksOutOfPlace(RandomAccessIterator array, int firstKey, int medianKey, int start, int blockCount, int blockLen,
+        void MergeBlocksOutOfPlace(RandomAccessIterator array, int firstKey, int medianKey, int start, int blockCount,
+                                   int blockLen,
                                    int lastMergeBlocks, int lastLen, Compare comp) {
             int buffer;
             int currBlock;
             int nextBlock = start + blockLen;
 
-            this->currBlockLen    = blockLen;
+            this->currBlockLen = blockLen;
             this->currBlockOrigin = GetSubarray(array, firstKey, medianKey, comp);
 
             Subarray nextBlockOrigin;
-            for(int keyIndex = 1; keyIndex < blockCount; keyIndex++, nextBlock += blockLen) {
+            for (int keyIndex = 1; keyIndex < blockCount; keyIndex++, nextBlock += blockLen) {
                 currBlock = nextBlock - this->currBlockLen;
                 nextBlockOrigin = GetSubarray(array, firstKey + keyIndex, medianKey, comp);
 
-                if(nextBlockOrigin == this->currBlockOrigin) {
+                if (nextBlockOrigin == this->currBlockOrigin) {
                     buffer = currBlock - blockLen;
                     std::move(array + currBlock, array + (currBlock + this->currBlockLen), array + buffer);
                     this->currBlockLen = blockLen;
-                }
-                else {
-                    SmartMergeOutOfPlace(array, currBlock, this->currBlockLen, this->currBlockOrigin, blockLen, blockLen, comp);
+                } else {
+                    SmartMergeOutOfPlace(array, currBlock, this->currBlockLen, this->currBlockOrigin, blockLen,
+                                         blockLen, comp);
                 }
             }
 
             currBlock = nextBlock - this->currBlockLen;
             buffer = currBlock - blockLen;
 
-            if(lastLen != 0) {
-                if(this->currBlockOrigin == Subarray::RIGHT) {
+            if (lastLen != 0) {
+                if (this->currBlockOrigin == Subarray::RIGHT) {
                     std::move(array + currBlock, array + (currBlock + this->currBlockLen), array + buffer);
                     currBlock = nextBlock;
-                    this->currBlockLen    = blockLen * lastMergeBlocks;
+                    this->currBlockLen = blockLen * lastMergeBlocks;
                     this->currBlockOrigin = Subarray::LEFT;
-                }
-                else {
+                } else {
                     this->currBlockLen += blockLen * lastMergeBlocks;
                 }
 
                 MergeOutOfPlace(array, currBlock, this->currBlockLen, lastLen, blockLen, comp);
-            }
-            else {
+            } else {
                 std::move(array + currBlock, array + (currBlock + this->currBlockLen), array + buffer);
             }
         }
 
         //TODO: Double-check "Merge Blocks" arguments
+
         template<typename RandomAccessIterator, typename Compare>
-        void CombineInPlace(RandomAccessIterator array, int firstKey, int start, int length, int subarrayLen, int blockLen,
+        void CombineInPlace(RandomAccessIterator array, int firstKey, int start, int length, int subarrayLen,
+                            int blockLen,
                             int mergeCount, int lastSubarrays, bool buffer, Compare comp) {
             int fullMerge = 2 * subarrayLen;
             // SLIGHT OPTIMIZATION: 'blockCount' only needs to be calculated once for regular merges
             int blockCount = fullMerge / blockLen;
 
-            for(int mergeIndex = 0; mergeIndex < mergeCount; mergeIndex++) {
+            for (int mergeIndex = 0; mergeIndex < mergeCount; mergeIndex++) {
                 int offset = start + (mergeIndex * fullMerge);
 
                 InsertSort(array, firstKey, blockCount, comp);
@@ -924,16 +900,15 @@ namespace grailsort_detail
                 int medianKey = subarrayLen / blockLen;
                 medianKey = BlockSelectSort(array, firstKey, offset, medianKey, blockCount, blockLen, comp);
 
-                if(buffer) {
+                if (buffer) {
                     MergeBlocks(array, firstKey, firstKey + medianKey, offset, blockCount, blockLen, 0, 0, comp);
-                }
-                else {
+                } else {
                     LazyMergeBlocks(array, firstKey, firstKey + medianKey, offset, blockCount, blockLen, 0, 0, comp);
                 }
             }
 
             // INCORRECT CONDITIONAL/PARAMETER BUG FIXED: Credit to 666666t for debugging.
-            if(lastSubarrays != 0) {
+            if (lastSubarrays != 0) {
                 int offset = start + (mergeCount * fullMerge);
                 blockCount = lastSubarrays / blockLen;
 
@@ -947,54 +922,53 @@ namespace grailsort_detail
                 //                                 divided into blocks. This prevents Grailsort from going out-of-bounds.
                 int lastFragment = lastSubarrays - (blockCount * blockLen);
                 int lastMergeBlocks;
-                if(lastFragment != 0) {
+                if (lastFragment != 0) {
                     lastMergeBlocks = CountLastMergeBlocks(array, offset, blockCount, blockLen, comp);
-                }
-                else {
+                } else {
                     lastMergeBlocks = 0;
                 }
 
                 int smartMerges = blockCount - lastMergeBlocks;
 
                 //TODO: Double-check if this micro-optimization works correctly like the original
-                if(smartMerges == 0) {
+                if (smartMerges == 0) {
                     int leftLen = lastMergeBlocks * blockLen;
 
                     // INCORRECT PARAMETER BUG FIXED: these merges should be using `offset`, not `start`
-                    if(buffer) {
+                    if (buffer) {
                         MergeForwards(array, offset, leftLen, lastFragment, blockLen, comp);
-                    }
-                    else {
+                    } else {
                         LazyMerge(array, offset, leftLen, lastFragment, comp);
                     }
-                }
-                else {
-                    if(buffer) {
+                } else {
+                    if (buffer) {
                         MergeBlocks(array, firstKey, firstKey + medianKey, offset,
                                     smartMerges, blockLen, lastMergeBlocks, lastFragment, comp);
-                    }
-                    else {
+                    } else {
                         LazyMergeBlocks(array, firstKey, firstKey + medianKey, offset,
                                         smartMerges, blockLen, lastMergeBlocks, lastFragment, comp);
                     }
                 }
             }
 
-            if(buffer) {
+            if (buffer) {
                 InPlaceBufferReset(array, start, length, blockLen);
             }
         }
 
         template<typename RandomAccessIterator, typename BufferIterator, typename Compare>
-        void CombineOutOfPlace(RandomAccessIterator array, int firstKey, int start, int length, int subarrayLen, int blockLen,
-                               int mergeCount, int lastSubarrays, BufferIterator extBuffer, int extBufferLen, Compare comp) {
+
+        void CombineOutOfPlace(RandomAccessIterator array, int firstKey, int start, int length, int subarrayLen,
+                               int blockLen,
+                               int mergeCount, int lastSubarrays, BufferIterator extBuffer, int extBufferLen,
+                               Compare comp) {
             std::move(array + (start - blockLen), array + start, extBuffer);
 
             int fullMerge = 2 * subarrayLen;
             // SLIGHT OPTIMIZATION: 'blockCount' only needs to be calculated once for regular merges
             int blockCount = fullMerge / blockLen;
 
-            for(int mergeIndex = 0; mergeIndex < mergeCount; mergeIndex++) {
+            for (int mergeIndex = 0; mergeIndex < mergeCount; mergeIndex++) {
                 int offset = start + (mergeIndex * fullMerge);
 
                 InsertSort(array, firstKey, blockCount, comp);
@@ -1008,7 +982,7 @@ namespace grailsort_detail
             }
 
             // INCORRECT CONDITIONAL/PARAMETER BUG FIXED: Credit to 666666t for debugging.
-            if(lastSubarrays != 0) {
+            if (lastSubarrays != 0) {
                 int offset = start + (mergeCount * fullMerge);
                 blockCount = lastSubarrays / blockLen;
 
@@ -1022,23 +996,21 @@ namespace grailsort_detail
                 //                                 divided into blocks. This prevents Grailsort from going out-of-bounds.
                 int lastFragment = lastSubarrays - (blockCount * blockLen);
                 int lastMergeBlocks;
-                if(lastFragment != 0) {
+                if (lastFragment != 0) {
                     lastMergeBlocks = CountLastMergeBlocks(array, offset, blockCount, blockLen, comp);
-                }
-                else {
+                } else {
                     lastMergeBlocks = 0;
                 }
 
                 int smartMerges = blockCount - lastMergeBlocks;
 
-                if(smartMerges == 0) {
+                if (smartMerges == 0) {
                     // MINOR CHANGE: renamed for consistency (used to be 'leftLength')
                     int leftLen = lastMergeBlocks * blockLen;
 
                     // INCORRECT PARAMETER BUG FIXED: this merge should be using `offset`, not `start`
                     MergeOutOfPlace(array, offset, leftLen, lastFragment, blockLen, comp);
-                }
-                else {
+                } else {
                     MergeBlocksOutOfPlace(array, firstKey, firstKey + medianKey, offset,
                                           smartMerges, blockLen, lastMergeBlocks, lastFragment, comp);
                 }
@@ -1057,24 +1029,24 @@ namespace grailsort_detail
         //                    *Please also check everything surrounding 'if(lastSubarrays != 0)' inside
         //                    'combine in-/out-of-place' methods for other renames!!*
         template<typename RandomAccessIterator, typename BufferIterator, typename Compare>
-        void CombineBlocks(RandomAccessIterator array, int firstKey, int start, int length, int subarrayLen, int blockLen,
-                                bool buffer, BufferIterator extBuffer, int extBufferLen, Compare comp) {
-            int    fullMerge = 2 * subarrayLen;
-            int   mergeCount = length /  fullMerge;
+        void CombineBlocks(RandomAccessIterator array, int firstKey, int start, int length, int subarrayLen,
+                           int blockLen,
+                           bool buffer, BufferIterator extBuffer, int extBufferLen, Compare comp) {
+            int fullMerge = 2 * subarrayLen;
+            int mergeCount = length / fullMerge;
             int lastSubarrays = length - (fullMerge * mergeCount);
 
-            if(lastSubarrays <= subarrayLen) {
+            if (lastSubarrays <= subarrayLen) {
                 length -= lastSubarrays;
                 lastSubarrays = 0;
             }
 
             // INCOMPLETE CONDITIONAL BUG FIXED: In order to combine blocks out-of-place, we must check if a full-sized
             //                                   block fits into our external buffer.
-            if(buffer && blockLen <= extBufferLen) {
+            if (buffer && blockLen <= extBufferLen) {
                 CombineOutOfPlace(array, firstKey, start, length, subarrayLen, blockLen, mergeCount, lastSubarrays,
                                   extBuffer, extBufferLen, comp);
-            }
-            else {
+            } else {
                 CombineInPlace(array, firstKey, start, length, subarrayLen, blockLen,
                                mergeCount, lastSubarrays, buffer, comp);
             }
@@ -1086,28 +1058,27 @@ namespace grailsort_detail
         // MINOR CHANGES: better naming -- 'insertPos' is now 'mergeLen' -- and "middle"/"end" calculations simplified
         template<typename RandomAccessIterator, typename Compare>
         static void LazyMerge(RandomAccessIterator array, int start, int leftLen, int rightLen, Compare comp) {
-            if(leftLen < rightLen) {
+            if (leftLen < rightLen) {
                 int middle = start + leftLen;
 
-                while(leftLen != 0) {
+                while (leftLen != 0) {
                     int mergeLen = BinarySearchLeft(array, middle, rightLen, array[start], comp);
 
-                    if(mergeLen != 0) {
+                    if (mergeLen != 0) {
                         Rotate(array, start, leftLen, mergeLen);
-                        start    += mergeLen;
+                        start += mergeLen;
                         rightLen -= mergeLen;
                     }
 
                     middle += mergeLen;
 
-                    if(rightLen == 0) {
+                    if (rightLen == 0) {
                         break;
-                    }
-                    else {
+                    } else {
                         do {
                             start++;
                             leftLen--;
-                        } while(leftLen != 0 && comp(array[start], array[middle]) <= 0);
+                        } while (leftLen != 0 && comp(array[start], array[middle]) <= 0);
                     }
                 }
             }
@@ -1116,24 +1087,23 @@ namespace grailsort_detail
                 int end = start + leftLen + rightLen - 1;
 
 
-                while(rightLen != 0) {
+                while (rightLen != 0) {
                     int mergeLen = BinarySearchRight(array, start, leftLen, array[end], comp);
 
-                    if(mergeLen != leftLen) {
+                    if (mergeLen != leftLen) {
                         Rotate(array, start + mergeLen, leftLen - mergeLen, rightLen);
                         end -= leftLen - mergeLen;
                         leftLen = mergeLen;
                     }
 
-                    if(leftLen == 0) {
+                    if (leftLen == 0) {
                         break;
-                    }
-                    else {
+                    } else {
                         int middle = start + leftLen;
                         do {
                             rightLen--;
                             end--;
-                        } while(rightLen != 0 && comp(array[middle - 1], array[end]) <= 0);
+                        } while (rightLen != 0 && comp(array[middle - 1], array[end]) <= 0);
                     }
                 }
             }
@@ -1141,26 +1111,26 @@ namespace grailsort_detail
 
         template<typename RandomAccessIterator, typename Compare>
         static void LazyStableSort(RandomAccessIterator array, int start, int length, Compare comp) {
-            for(int index = 1; index < length; index += 2) {
-                int  left = start + index - 1;
+            for (int index = 1; index < length; index += 2) {
+                int left = start + index - 1;
                 int right = start + index;
 
-                if(comp(array[left], array[right]) > 0) {
+                if (comp(array[left], array[right]) > 0) {
                     std::swap(array[left], array[right]);
                 }
             }
-            for(int mergeLen = 2; mergeLen < length; mergeLen *= 2) {
+            for (int mergeLen = 2; mergeLen < length; mergeLen *= 2) {
                 int fullMerge = 2 * mergeLen;
 
                 int mergeIndex;
                 int mergeEnd = length - fullMerge;
 
-                for(mergeIndex = 0; mergeIndex <= mergeEnd; mergeIndex += fullMerge) {
+                for (mergeIndex = 0; mergeIndex <= mergeEnd; mergeIndex += fullMerge) {
                     LazyMerge(array, start + mergeIndex, mergeLen, mergeLen, comp);
                 }
 
                 int leftOver = length - mergeIndex;
-                if(leftOver > mergeLen) {
+                if (leftOver > mergeLen) {
                     LazyMerge(array, start + mergeIndex, mergeLen, leftOver - mergeLen, comp);
                 }
             }
@@ -1182,8 +1152,9 @@ namespace grailsort_detail
         }*/
 
         template<typename RandomAccessIterator, typename BufferIterator, typename Compare>
-        void CommonSort(RandomAccessIterator array, int start, int length, BufferIterator extBuf, int extBufLen, Compare comp) {
-            if(length < 16) {
+        void CommonSort(RandomAccessIterator array, int start, int length, BufferIterator extBuf, int extBufLen,
+                        Compare comp) {
+            if (length < 16) {
                 InsertSort(array, start, length, comp);
                 return;
             }
@@ -1195,7 +1166,7 @@ namespace grailsort_detail
 
             // find the smallest power of two greater than or equal to
             // the square root of the input's length
-            while((blockLen * blockLen) < length) {
+            while ((blockLen * blockLen) < length) {
                 blockLen *= 2;
             }
 
@@ -1213,39 +1184,36 @@ namespace grailsort_detail
             int keysFound = CollectKeys(array, start, length, idealKeys, comp);
 
             bool idealBuffer;
-            if(keysFound < idealKeys) {
-                if(keysFound == 1) return;
-                if(keysFound < 4) {
+            if (keysFound < idealKeys) {
+                if (keysFound == 1) return;
+                if (keysFound < 4) {
                     // GRAILSORT STRATEGY 3 -- No block swaps or scrolling buffer; resort to Lazy Stable Sort
                     LazyStableSort(array, start, length, comp);
                     return;
-                }
-                else {
+                } else {
                     // GRAILSORT STRATEGY 2 -- Block swaps with small scrolling buffer and/or lazy merges
                     keyLen = blockLen;
                     blockLen = 0;
                     idealBuffer = false;
 
-                    while(keyLen > keysFound) {
+                    while (keyLen > keysFound) {
                         keyLen /= 2;
                     }
                 }
-            }
-            else {
+            } else {
                 // GRAILSORT STRATEGY 1 -- Block swaps with scrolling buffer
                 idealBuffer = true;
             }
 
             int bufferEnd = blockLen + keyLen;
             int subarrayLen;
-            if(idealBuffer) {
+            if (idealBuffer) {
                 subarrayLen = blockLen;
-            }
-            else {
+            } else {
                 subarrayLen = keyLen;
             }
 
-            if(idealBuffer && extBufLen != 0) {
+            if (idealBuffer && extBufLen != 0) {
                 // GRAILSORT + EXTRA SPACE
                 extBuffer = extBuf;
                 extBufferLen = extBufLen;
@@ -1254,7 +1222,7 @@ namespace grailsort_detail
             BuildBlocks(array, start + bufferEnd, length - bufferEnd, subarrayLen,
                         extBuffer, extBufferLen, comp);
 
-            while((length - bufferEnd) > (2 * subarrayLen)) {
+            while ((length - bufferEnd) > (2 * subarrayLen)) {
                 subarrayLen *= 2;
 
                 int currBlockLen = blockLen;
@@ -1262,14 +1230,13 @@ namespace grailsort_detail
 
                 // Huge credit to Anonymous0726, phoenixbound, and DeveloperSort for their tireless efforts
                 // towards deconstructing this math.
-                if(!idealBuffer) {
+                if (!idealBuffer) {
                     int keyBuffer = keyLen / 2;
                     // TODO: Rewrite explanation for this math
-                    if(keyBuffer >= (2 * subarrayLen) / keyBuffer) {
+                    if (keyBuffer >= (2 * subarrayLen) / keyBuffer) {
                         currBlockLen = keyBuffer;
                         scrollingBuffer = true;
-                    }
-                    else {
+                    } else {
                         // This is a very recent discovery, and the math will be spelled out later, but this
                         // "minKeys" calculation is *completely unnecessary*. "minKeys" would be less than
                         // "keyLen" iff keyBuffer >= (2 * subarrayLen) / keyBuffer... but this situation is
@@ -1300,32 +1267,29 @@ namespace grailsort_detail
 
 template<
     typename RandomAccessIterator,
-    typename Compare = std::less<>
->
-void grailsort(RandomAccessIterator first, RandomAccessIterator last, Compare comp={})
-{
+    typename Compare = std::less<> >
+void grailsort(RandomAccessIterator first, RandomAccessIterator last, Compare comp = {}) {
     using value_type = typename std::iterator_traits<RandomAccessIterator>::value_type;
 
     grailsort_detail::GrailSort gsort;
     gsort.CommonSort(first, 0, last - first,
-                     (value_type*)nullptr, 0,
+                     (value_type *) nullptr, 0,
                      grailsort_detail::ThreeWayCompare<Compare>(std::move(comp)));
 }
 
 template<
     typename RandomAccessIterator1,
     typename RandomAccessIterator2,
-    typename Compare = std::less<>
->
+    typename Compare = std::less<> >
 void grailsort(RandomAccessIterator1 first, RandomAccessIterator1 last,
                RandomAccessIterator2 buff_first, RandomAccessIterator2 buff_last,
-               Compare comp={})
-{
+               Compare comp = {}) {
     grailsort_detail::GrailSort gsort;
     gsort.CommonSort(first, 0, last - first,
                      buff_first, buff_last - buff_first,
                      grailsort_detail::ThreeWayCompare<Compare>(std::move(comp)));
 }
 
+#pragma GCC diagnostic pop
 
 #endif // REWRITTEN_GRAILSORT_H_
