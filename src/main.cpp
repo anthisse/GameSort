@@ -1,8 +1,10 @@
 #include <algorithm>
+#include <cstdlib>
 #include <chrono>
-#include <string>
-#include <random>
+#include <exception>
 #include <iostream>
+#include <random>
+#include <string>
 
 // Grailsort implementation provided by Morwenn.
 // Original code at https://github.com/HolyGrailSortProject/Rewritten-Grailsort
@@ -12,7 +14,7 @@ struct GameData {
     std::string title;
     std::string genre;
     std::vector<std::string> platforms;
-    float reviewScore;
+    float reviewScore = 0;
 
     static inline bool compareTitles(GameData* const lhs, GameData* const rhs) {
         return (lhs->title < rhs->title);
@@ -23,9 +25,18 @@ struct GameData {
     }
 };
 
+class apiException : public std::runtime_error {
+public:
+    apiException() : std::runtime_error("Moby API key missing") {}
+};
 
 int main() {
+    const char* env_MobyKey = std::getenv("MOBY_KEY");
+    if (!env_MobyKey) {
+        throw apiException();
+    }
     using namespace std::chrono;
+
     std::random_device rd;
     std::mt19937 generator(rd());
     std::uniform_real_distribution<float> reviewDistrib(1, 5);
