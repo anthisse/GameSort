@@ -5,10 +5,15 @@
 #include <random>
 #include <string>
 #include <curl/curl.h>
+#include <SFML/config.hpp>
+#include <SFML/Graphics.hpp>
 
 // Grailsort implementation provided by Morwenn.
 // Original code at https://github.com/HolyGrailSortProject/Rewritten-Grailsort
 #include "grailsort.h"
+
+// Parse json files. Provided by https://github.com/simdjson/simdjson
+#include "simdjson.h"
 
 struct GameData {
     std::string title;
@@ -37,21 +42,26 @@ int main() {
 
     curl = curl_easy_init();
     if (curl) {
+        puts("1");
         curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
         /* example.com is redirected, so we tell libcurl to follow redirection */
+        puts("2");
         curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 
         /* Perform the request, res gets the return code */
+        puts("3");
         res = curl_easy_perform(curl);
         /* Check for errors */
-        if (res != CURLE_OK)
+        puts("4");
+        if (res != CURLE_OK) {
+            puts("5");
             fprintf(stderr, "curl_easy_perform() failed: %s\n",
                     curl_easy_strerror(res));
-
+        }
+        puts("6");
         /* always cleanup */
         curl_easy_cleanup(curl);
     }
-
 
     const char *env_MobyKey = std::getenv("MOBY_KEY");
     if (!env_MobyKey) {
@@ -85,19 +95,9 @@ int main() {
     }
     puts("Sorting by review score, then by title: ");
     auto start = clock::now();
-    std::stable_sort(data.begin(), data.end(), GameData::compareTitles);
-    std::stable_sort(data.begin(), data.end(), GameData::compareScores);
-    auto elapsedTime = duration_cast<milliseconds>(clock::now() - start);
-    std::cout << "data: \n";
-    std::cout << "This took " << elapsedTime.count() << " milliseconds.\n";
-
-    std::shuffle(data.begin(), data.end(), generator);
-
-    std::cout << "data: \n";
-    start = clock::now();
     grailsort(data.begin(), data.end(), GameData::compareTitles);
     grailsort(data.begin(), data.end(), GameData::compareScores);
-    elapsedTime = duration_cast<milliseconds>(clock::now() - start);
+    auto elapsedTime = duration_cast<milliseconds>(clock::now() - start);
     std::cout << "This took " << elapsedTime.count() << " milliseconds.\n";
 
     std::cout << "first element " << data[0]->title << '\n';
