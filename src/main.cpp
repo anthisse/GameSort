@@ -40,9 +40,7 @@ int main() {
     // TODO terrible function name, refactor later
     // handleCurl(env_MobyKey);
 
-    using std::chrono::duration_cast;
-    typedef std::chrono::milliseconds millis;
-    typedef std::chrono::steady_clock clock;
+    using std::chrono::duration_cast, std::chrono::milliseconds, std::chrono::steady_clock;
 
     std::random_device rd;
     std::mt19937 generator(rd());
@@ -54,7 +52,7 @@ int main() {
     std::uniform_int_distribution platformDistrib(0, 1);
 
     std::vector<Game*> data;
-    for (int n = 0; n != 100; ++n) {
+    for (int n = 0; n != 200000; ++n) {
         auto* game = new Game();
         game->reviewScore = reviewDistrib(generator);
         for (int i = 0; i < titleLengthDistrib(generator); i++) {
@@ -68,28 +66,32 @@ int main() {
     }
 
     // TODO use timsort and merge sort instead of grailsort and std::stable_sort
-    // puts("Sorting by review score, then by title: ");
-    // auto start = clock::now();
-    // grailsort(data.begin(), data.end(), Game::compareTitles);
-    // grailsort(data.begin(), data.end(), Game::compareScores);
-    // auto elapsedTime = duration_cast<millis>(clock::now() - start);
-    // std::cout << "This took " << elapsedTime.count() << " milliseconds.\n";
-    //
-    // std::shuffle(data.begin(), data.end(), generator);
+    puts("Sorting by review score, then by title: ");
+    auto start = steady_clock::now();
+    grailsort(data.begin(), data.end(), Game::compareTitles);
+    grailsort(data.begin(), data.end(), Game::compareScores);
+    auto elapsedTime = duration_cast<milliseconds>(steady_clock::now() - start);
+    std::cout << "This took " << elapsedTime.count() << " milliseconds.\n";
+
+    std::shuffle(data.begin(), data.end(), generator);
 
     // TODO use timsort and merge sort instead of grailsort and std::stable_sort
-    // auto start = clock::now();
-    // std::stable_sort(data.begin(), data.end(), Game::compareTitles);
-    // std::stable_sort(data.begin(), data.end(), Game::compareScores);
-    // auto elapsedTime = duration_cast<millis>(clock::now() - start);
+    start = steady_clock::now();
+    std::stable_sort(data.begin(), data.end(), Game::compareTitles);
+    std::stable_sort(data.begin(), data.end(), Game::compareScores);
+    elapsedTime = duration_cast<milliseconds>(steady_clock::now() - start);
 
+    std::shuffle(data.begin(), data.end(), generator);
     puts("Insertion sorting...");
-    ts::_insertionSort(data, Game::compareScores);
-    std::cout << "Sorted array:\n";
-    for (const auto& elem : data) {
-        std::cout << elem->reviewScore << "\n";
-    }
-    std::cout << std::endl;
+    start = steady_clock::now();
+    ts::_binaryInsertionSort(data, Game::compareScores);
+    elapsedTime = duration_cast<milliseconds>(steady_clock::now() - start);
+    std::cout << "Sorted array's first element:";
+    std::cout << data.front()->reviewScore << '\n';
+    std::cout << "Sorted array's last element: \n" << data.back()->reviewScore << '\n';
+    std::cout << "This took " << elapsedTime.count() << " milliseconds.\n";
+
+
 
     return 0;
 }

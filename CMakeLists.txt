@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.27)
 project(GameSort)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_FLAGS "-Wall -Wextra -pedantic -std=c++17")
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_FLAGS "-Wall -Wextra -pedantic -std=c++20")
 
 find_package(CURL REQUIRED)
 
@@ -13,6 +13,7 @@ add_executable(GameSort
         src/timsort.h
         src/Game.cpp
         src/Game.h
+        src/timsort.cpp
 )
 
 set(SFML_STATIC_LIBRARIES TRUE)
