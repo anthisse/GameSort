@@ -6,10 +6,14 @@ set(CMAKE_CXX_FLAGS "-Wall -Wextra -pedantic -std=c++17")
 
 find_package(CURL REQUIRED)
 
-add_executable(GameSort src/grailsort.h
+add_executable(GameSort
         src/main.cpp
         src/simdjson.h
-        src/simdjson.cpp)
+        src/simdjson.cpp
+        src/timsort.h
+        src/Game.cpp
+        src/Game.h
+)
 
 set(SFML_STATIC_LIBRARIES TRUE)
 set(SFML_DIR C:/SFML/lib/cmake/SFML)

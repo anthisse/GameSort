@@ -8,27 +8,20 @@
 #include <SFML/config.hpp>
 #include <SFML/Graphics.hpp>
 
+#include "Game.h"
+
 // Grailsort implementation provided by Morwenn.
 // Original code at https://github.com/HolyGrailSortProject/Rewritten-Grailsort
 #include "grailsort.h"
 
 // Parse json files. Provided by https://github.com/simdjson/simdjson
 #include "simdjson.h"
+#include "timsort.h"
 
-struct GameData {
-    std::string title;
-    std::string genre;
-    std::vector<std::string> platforms;
-    float reviewScore = 0;
+// FIXME Only platforms with over 1000 games included for now
 
-    static bool compareTitles(const GameData *const lhs, const GameData *const rhs) {
-        return (lhs->title < rhs->title);
-    }
 
-    static bool compareScores(const GameData *const lhs, const GameData *const rhs) {
-        return (lhs->reviewScore < rhs->reviewScore);
-    }
-};
+// TODO use timsort and merge sort instead of grailsort and std::stable_sort
 
 class apiException final : public std::runtime_error {
 public:
@@ -36,39 +29,19 @@ public:
     }
 };
 
+void handleCurl(const char* env_MobyKey);
+
 int main() {
-    CURL *curl;
-    CURLcode res;
-
-    curl = curl_easy_init();
-    if (curl) {
-        puts("1");
-        curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-        /* example.com is redirected, so we tell libcurl to follow redirection */
-        puts("2");
-        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-
-        /* Perform the request, res gets the return code */
-        puts("3");
-        res = curl_easy_perform(curl);
-        /* Check for errors */
-        puts("4");
-        if (res != CURLE_OK) {
-            puts("5");
-            fprintf(stderr, "curl_easy_perform() failed: %s\n",
-                    curl_easy_strerror(res));
-        }
-        puts("6");
-        /* always cleanup */
-        curl_easy_cleanup(curl);
-    }
-
-    const char *env_MobyKey = std::getenv("MOBY_KEY");
+    const char* env_MobyKey = std::getenv("MOBY_KEY");
     if (!env_MobyKey) {
         throw apiException();
     }
 
-    using std::chrono::duration_cast, std::chrono::milliseconds;
+    // TODO terrible function name, refactor later
+    // handleCurl(env_MobyKey);
+
+    using std::chrono::duration_cast;
+    typedef std::chrono::milliseconds millis;
     typedef std::chrono::steady_clock clock;
 
     std::random_device rd;
@@ -80,9 +53,9 @@ int main() {
     std::uniform_int_distribution platformLengthDistrib(1, 6);
     std::uniform_int_distribution platformDistrib(0, 1);
 
-    std::vector<GameData *> data;
-    for (int n = 0; n != 100000; ++n) {
-        auto *game = new GameData();
+    std::vector<Game*> data;
+    for (int n = 0; n != 100; ++n) {
+        auto* game = new Game();
         game->reviewScore = reviewDistrib(generator);
         for (int i = 0; i < titleLengthDistrib(generator); i++) {
             char randomChar = charDistrib(generator);
@@ -93,13 +66,54 @@ int main() {
         }
         data.push_back(game);
     }
-    puts("Sorting by review score, then by title: ");
-    auto start = clock::now();
-    grailsort(data.begin(), data.end(), GameData::compareTitles);
-    grailsort(data.begin(), data.end(), GameData::compareScores);
-    auto elapsedTime = duration_cast<milliseconds>(clock::now() - start);
-    std::cout << "This took " << elapsedTime.count() << " milliseconds.\n";
 
-    std::cout << "first element " << data[0]->title << '\n';
+    // TODO use timsort and merge sort instead of grailsort and std::stable_sort
+    // puts("Sorting by review score, then by title: ");
+    // auto start = clock::now();
+    // grailsort(data.begin(), data.end(), Game::compareTitles);
+    // grailsort(data.begin(), data.end(), Game::compareScores);
+    // auto elapsedTime = duration_cast<millis>(clock::now() - start);
+    // std::cout << "This took " << elapsedTime.count() << " milliseconds.\n";
+    //
+    // std::shuffle(data.begin(), data.end(), generator);
+
+    // TODO use timsort and merge sort instead of grailsort and std::stable_sort
+    // auto start = clock::now();
+    // std::stable_sort(data.begin(), data.end(), Game::compareTitles);
+    // std::stable_sort(data.begin(), data.end(), Game::compareScores);
+    // auto elapsedTime = duration_cast<millis>(clock::now() - start);
+
+    puts("Insertion sorting...");
+    ts::_insertionSort(data, Game::compareScores);
+    std::cout << "Sorted array:\n";
+    for (const auto& elem : data) {
+        std::cout << elem->reviewScore << "\n";
+    }
+    std::cout << std::endl;
+
     return 0;
+}
+
+void handleCurl(const char* env_MobyKey) {
+    std::string url = "https://api.mobygames.com/v1/games?api_key=" + std::string(env_MobyKey);
+    printf("url is %s", url.c_str());
+    CURL* curl_handle;
+    CURLcode res;
+
+    curl_handle = curl_easy_init();
+    if (curl_handle) {
+        curl_easy_setopt(curl_handle, CURLOPT_URL, url.c_str());
+        /* example.com is redirected, so we tell libcurl to follow redirection */
+        curl_easy_setopt(curl_handle, CURLOPT_FOLLOWLOCATION, 1L);
+
+        /* Perform the request, res gets the return code */
+        res = curl_easy_perform(curl_handle);
+        /* Check for errors */
+        if (res != CURLE_OK) {
+            fprintf(stderr, "curl_easy_perform() failed: %s\n",
+                    curl_easy_strerror(res));
+        }
+        /* always cleanup */
+        curl_easy_cleanup(curl_handle);
+    }
 }
