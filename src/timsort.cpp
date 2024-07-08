@@ -1,11 +1,13 @@
 #include <algorithm>
 #include <cstdint>
+#include <set>
 #include "timsort.h"
 
 namespace ts {
     void _binaryInsertionSort(std::vector<Game*>& games, bool (*lessThanComparator)(const Game* lhs, const Game* rhs)) {
         // int actually isn't big enough; its size is only guarunteed to be up to 32,767.
         // data is around 200,000 elements in size
+
         // For each unsorted element (assumes first element is already sorted)
         for (int32_t leftUnsortedIndex = 1; leftUnsortedIndex < static_cast<int32_t>(games.size()); leftUnsortedIndex
              ++) {
@@ -25,5 +27,8 @@ namespace ts {
             // Move the key to the correct position
             games[targetKeyIndex] = key;
         }
+    }
+
+    void _merge(std::vector<Game*>& games, int32_t left, int32_t mid, int32_t right) {
     }
 }

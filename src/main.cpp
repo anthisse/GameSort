@@ -1,9 +1,12 @@
 #include <algorithm>
-#include <cstdlib>
 #include <chrono>
+#include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <random>
 #include <string>
+
+
 #include <curl/curl.h>
 #include <SFML/config.hpp>
 #include <SFML/Graphics.hpp>
@@ -31,6 +34,8 @@ public:
 
 void handleCurl(const char* env_MobyKey);
 
+void randomDataAnalysis();
+
 int main() {
     const char* env_MobyKey = std::getenv("MOBY_KEY");
     if (!env_MobyKey) {
@@ -40,7 +45,55 @@ int main() {
     // TODO terrible function name, refactor later
     // handleCurl(env_MobyKey);
 
-    using std::chrono::duration_cast, std::chrono::milliseconds, std::chrono::steady_clock;
+
+    const std::string platformPath = "../platforms";
+
+    std::vector<std::filesystem::directory_entry> files;
+    for (const auto& entry : std::filesystem::directory_iterator(platformPath)) {
+        std::ifstream file(entry.path());
+
+        
+        files.push_back(entry);
+    }
+
+    std::vector<Game*> games;
+    for (const auto& entry : files) {
+        std::cout << "file: " << entry.path().filename().string() << "\n";
+    }
+
+    randomDataAnalysis();
+    return 0;
+}
+
+void handleCurl(const char* env_MobyKey) {
+    std::string url = "https://api.mobygames.com/v1/games?api_key=" + std::string(env_MobyKey);
+    printf("url is %s", url.c_str());
+    CURL* curl_handle;
+    CURLcode res;
+
+    curl_handle = curl_easy_init();
+    if (curl_handle) {
+        curl_easy_setopt(curl_handle, CURLOPT_URL, url.c_str());
+        /* example.com is redirected, so we tell libcurl to follow redirection */
+        curl_easy_setopt(curl_handle, CURLOPT_FOLLOWLOCATION, 1L);
+
+        /* Perform the request, res gets the return code */
+        res = curl_easy_perform(curl_handle);
+        /* Check for errors */
+        if (res != CURLE_OK) {
+            fprintf(stderr, "curl_easy_perform() failed: %s\n",
+                    curl_easy_strerror(res));
+        }
+        /* always cleanup */
+        curl_easy_cleanup(curl_handle);
+    }
+}
+
+void randomDataAnalysis() {
+
+    using std::chrono::duration_cast;
+    using ms = std::chrono::milliseconds;
+    using clock = std::chrono::steady_clock;
 
     std::random_device rd;
     std::mt19937 generator(rd());
@@ -67,55 +120,29 @@ int main() {
 
     // TODO use timsort and merge sort instead of grailsort and std::stable_sort
     puts("Sorting by review score, then by title: ");
-    auto start = steady_clock::now();
+    auto start = clock::now();
     grailsort(data.begin(), data.end(), Game::compareTitles);
     grailsort(data.begin(), data.end(), Game::compareScores);
-    auto elapsedTime = duration_cast<milliseconds>(steady_clock::now() - start);
-    std::cout << "This took " << elapsedTime.count() << " milliseconds.\n";
+    auto elapsedTime = duration_cast<ms>(clock::now() - start);
+    std::cout << "Grailsort took " << elapsedTime.count() << " milliseconds.\n";
 
     std::shuffle(data.begin(), data.end(), generator);
 
     // TODO use timsort and merge sort instead of grailsort and std::stable_sort
-    start = steady_clock::now();
+    start = clock::now();
     std::stable_sort(data.begin(), data.end(), Game::compareTitles);
     std::stable_sort(data.begin(), data.end(), Game::compareScores);
-    elapsedTime = duration_cast<milliseconds>(steady_clock::now() - start);
+    elapsedTime = duration_cast<ms>(clock::now() - start);
+    std::cout << "Stablesort took " << elapsedTime.count() << "milliseconds.\n";
 
     std::shuffle(data.begin(), data.end(), generator);
+
     puts("Insertion sorting...");
-    start = steady_clock::now();
+    start = clock::now();
     ts::_binaryInsertionSort(data, Game::compareScores);
-    elapsedTime = duration_cast<milliseconds>(steady_clock::now() - start);
+    elapsedTime = duration_cast<ms>(clock::now() - start);
     std::cout << "Sorted array's first element:";
     std::cout << data.front()->reviewScore << '\n';
     std::cout << "Sorted array's last element: \n" << data.back()->reviewScore << '\n';
-    std::cout << "This took " << elapsedTime.count() << " milliseconds.\n";
-
-
-
-    return 0;
-}
-
-void handleCurl(const char* env_MobyKey) {
-    std::string url = "https://api.mobygames.com/v1/games?api_key=" + std::string(env_MobyKey);
-    printf("url is %s", url.c_str());
-    CURL* curl_handle;
-    CURLcode res;
-
-    curl_handle = curl_easy_init();
-    if (curl_handle) {
-        curl_easy_setopt(curl_handle, CURLOPT_URL, url.c_str());
-        /* example.com is redirected, so we tell libcurl to follow redirection */
-        curl_easy_setopt(curl_handle, CURLOPT_FOLLOWLOCATION, 1L);
-
-        /* Perform the request, res gets the return code */
-        res = curl_easy_perform(curl_handle);
-        /* Check for errors */
-        if (res != CURLE_OK) {
-            fprintf(stderr, "curl_easy_perform() failed: %s\n",
-                    curl_easy_strerror(res));
-        }
-        /* always cleanup */
-        curl_easy_cleanup(curl_handle);
-    }
+    std::cout << "Insertion sort took " << elapsedTime.count() << " milliseconds.\n";
 }
