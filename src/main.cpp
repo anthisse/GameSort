@@ -30,7 +30,7 @@ void handleCurl(const char* env_MobyKey);
 void randomDataAnalysis();
 
 int main() {
-    const char* env_MobyKey = std::getenv("MOBY_KEY");
+    const char *env_MobyKey = std::getenv("MOBY_KEY");
     if (!env_MobyKey) {
         throw apiException();
     }
@@ -40,22 +40,27 @@ int main() {
 
 
     const std::string platformPath = "../platforms";
+    try {
+        std::filesystem::directory_iterator dirIt(platformPath);
+        std::vector<std::filesystem::directory_entry> files;
+        for (const auto &entry: dirIt) {
+            std::ifstream file(entry.path());
+            files.push_back(entry);
+        }
 
-    std::vector<std::filesystem::directory_entry> files;
-    for (const auto& entry : std::filesystem::directory_iterator(platformPath)) {
-        std::ifstream file(entry.path());
-
-        
-        files.push_back(entry);
+        std::vector<Game *> games;
+        for (const auto &entry: files) {
+            std::cout << "file: " << entry.path().filename().string() << "\n";
+        }
     }
+        catch (const std::filesystem::filesystem_error & e)
+        {
+            std::cerr << "Filesystem error: " << e.what() << '\n';
+        }
 
-    std::vector<Game*> games;
-    for (const auto& entry : files) {
-        std::cout << "file: " << entry.path().filename().string() << "\n";
-    }
+        randomDataAnalysis();
+        return 0;
 
-    randomDataAnalysis();
-    return 0;
 }
 
 void handleCurl(const char* env_MobyKey) {
@@ -91,6 +96,30 @@ void randomDataAnalysis() {
 
     std::random_device rd;
     std::mt19937 generator(rd());
+    std::uniform_real_distribution<float> reviewDistrib(1.0f, 5.0f);
+    std::uniform_int_distribution<int> charDistrib('0', 'z');
+    std::uniform_int_distribution<int> titleLengthDistrib(5, 25);
+    std::vector<std::string> platforms = {"Nintendo Switch", "Xbox One X", "PlayStation 5", "PC", "macOS", "Linux"};
+    std::uniform_int_distribution<int> platformLengthDistrib(1, 6);
+    std::uniform_int_distribution<int> platformDistrib(0, 1);
+
+    std::vector<Game*> data;
+    for (int n = 0; n != 200000; ++n) {
+        auto* game = new Game();
+        game->reviewScore = reviewDistrib(generator);
+        for (int i = 0; i < titleLengthDistrib(generator); i++) {
+            char randomChar = static_cast<char>(charDistrib(generator));
+            while ((randomChar >= ':' && randomChar <= '@') || (randomChar >= '[' && randomChar <= '`')) {
+                randomChar = static_cast<char>(charDistrib(generator));
+            }
+            game->title += randomChar;
+        }
+        data.push_back(game);
+    }
+
+    /*
+    std::random_device rd;
+    std::mt19937 generator(rd());
     std::uniform_real_distribution reviewDistrib(1.0f, 5.0f);
     std::uniform_int_distribution charDistrib('0', 'z');
     std::uniform_int_distribution titleLengthDistrib(5, 25);
@@ -111,6 +140,9 @@ void randomDataAnalysis() {
         }
         data.push_back(game);
     }
+     */
+
+
     // TODO use timsort and merge sort instead of grailsort and std::stable_sort
     puts("Sorting by review score, then by title: ");
 
