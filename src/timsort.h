@@ -82,7 +82,7 @@ namespace ts {
      * and std::stable_sort work.
      *
      * Average computational complexity: O(n log(n))
-     *   The log(n) comes from the repeated division of the main vector
+     * The log(n) comes from the repeated division of the main vector
      * Average space complexity: O(n) (slices duplicated from main vector)
      * Stable algorithm
      */
