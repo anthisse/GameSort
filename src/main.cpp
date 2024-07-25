@@ -6,25 +6,18 @@
 #include <random>
 #include <string>
 
-
+// Libcurl C library. Fetch information from a URL.
 #include <curl/curl.h>
+
+// SFML. Graphics library.
 #include <SFML/config.hpp>
 #include <SFML/Graphics.hpp>
 
 #include "Game.h"
 
-// Grailsort implementation provided by Morwenn.
-// Original code at https://github.com/HolyGrailSortProject/Rewritten-Grailsort
-#include "grailsort.h"
-
 // Parse json files. Provided by https://github.com/simdjson/simdjson
 #include "simdjson.h"
 #include "timsort.h"
-
-// FIXME Only platforms with over 1000 games included for now
-
-
-// TODO use timsort and merge sort instead of grailsort and std::stable_sort
 
 class apiException final : public std::runtime_error {
 public:
@@ -117,32 +110,48 @@ void randomDataAnalysis() {
         }
         data.push_back(game);
     }
-
     // TODO use timsort and merge sort instead of grailsort and std::stable_sort
     puts("Sorting by review score, then by title: ");
+
+    puts("Tim sorting...");
     auto start = clock::now();
-    grailsort(data.begin(), data.end(), Game::compareTitles);
-    grailsort(data.begin(), data.end(), Game::compareScores);
+    ts::timsort(data, Game::compareTitles);
+    ts::timsort(data, Game::compareScores);
     auto elapsedTime = duration_cast<ms>(clock::now() - start);
-    std::cout << "Grailsort took " << elapsedTime.count() << " milliseconds.\n";
+    std::cout << "Sorted array's first element:";
+    std::cout << data.front()->reviewScore << '\n';
+    std::cout << "Sorted array's last element: \n" << data.back()->reviewScore << '\n';
+    std::cout << "Tim sort took " << elapsedTime.count() << " milliseconds.\n";
 
     std::shuffle(data.begin(), data.end(), generator);
+    std::cout << "Unorted array's first element:";
+    std::cout << data.front()->reviewScore << '\n';
+    std::cout << "Unsorted array's last element: \n" << data.back()->reviewScore << '\n';
 
     // TODO use timsort and merge sort instead of grailsort and std::stable_sort
     start = clock::now();
     std::stable_sort(data.begin(), data.end(), Game::compareTitles);
     std::stable_sort(data.begin(), data.end(), Game::compareScores);
     elapsedTime = duration_cast<ms>(clock::now() - start);
+    std::cout << "Sorted array's first element:";
+    std::cout << data.front()->reviewScore << '\n';
+    std::cout << "Sorted array's last element: \n" << data.back()->reviewScore << '\n';
     std::cout << "Stablesort took " << elapsedTime.count() << "milliseconds.\n";
 
     std::shuffle(data.begin(), data.end(), generator);
+    std::cout << "Unorted array's first element:";
+    std::cout << data.front()->reviewScore << '\n';
+    std::cout << "Unsorted array's last element: \n" << data.back()->reviewScore << '\n';
 
     puts("Insertion sorting...");
     start = clock::now();
-    ts::_binaryInsertionSort(data, Game::compareScores);
+    ts::binaryInsertionSort(data, Game::compareTitles);
+    ts::binaryInsertionSort(data, Game::compareScores);
     elapsedTime = duration_cast<ms>(clock::now() - start);
     std::cout << "Sorted array's first element:";
     std::cout << data.front()->reviewScore << '\n';
     std::cout << "Sorted array's last element: \n" << data.back()->reviewScore << '\n';
     std::cout << "Insertion sort took " << elapsedTime.count() << " milliseconds.\n";
+
+    std::shuffle(data.begin(), data.end(), generator);
 }

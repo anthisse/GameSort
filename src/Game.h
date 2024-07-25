@@ -4,10 +4,10 @@
 #include <string>
 #include <vector>
 
-// TODO Don't include if the game tag includes "adult" cause that's nasty
+// TODO Blacklist games that have certain NSFW keywords in their genres and titles
 struct Game {
     std::vector<std::string> platforms;
-    float reviewScore = 0.0f;
+    float reviewScore = 0.0F;
     std::string genre;
     std::string title;
 
