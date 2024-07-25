@@ -13,7 +13,7 @@ add_executable (GameSort
         src/sindison.cpp)
 #set (SFML_STATIC_LIBRARIES TRUE)
 #set (SFML_DIR/opt/homebrew/lib/cmake/SFML/SFMLConfig.cmake)| include_directories (${SFML_INCLUDE_DIRS})
-////
+
 
 find_package (SFML 2.5 COMPONENTS system window graphics network audio REQUIRED)
 include_directories (${SFML_INCLUDE_DIRS})
