@@ -21,8 +21,7 @@
 
 class apiException final : public std::runtime_error {
 public:
-    apiException() : std::runtime_error("Moby API key missing") {
-    }
+    apiException() : std::runtime_error("Moby API key missing") {}
 };
 
 void handleCurl(const char* env_MobyKey);
@@ -30,7 +29,7 @@ void handleCurl(const char* env_MobyKey);
 void randomDataAnalysis();
 
 int main() {
-    const char *env_MobyKey = std::getenv("MOBY_KEY");
+    const char* env_MobyKey = std::getenv("MOBY_KEY");
     if (!env_MobyKey) {
         throw apiException();
     }
@@ -39,28 +38,25 @@ int main() {
     // handleCurl(env_MobyKey);
 
 
-    const std::string platformPath = "../platforms";
+    const std::string platformPath = "../games/platforms";
     try {
         std::filesystem::directory_iterator dirIt(platformPath);
         std::vector<std::filesystem::directory_entry> files;
-        for (const auto &entry: dirIt) {
+        for (const auto& entry : dirIt) {
             std::ifstream file(entry.path());
             files.push_back(entry);
         }
 
-        std::vector<Game *> games;
-        for (const auto &entry: files) {
-            std::cout << "file: " << entry.path().filename().string() << "\n";
+        std::vector<Game*> games;
+        for (const auto& entry : files) {
+            std::cout << "file: " << entry.path().filename().string() << '\n';
         }
+    } catch (const std::filesystem::filesystem_error& e) {
+        std::cerr << "Filesystem error: " << e.what() << '\n';
     }
-        catch (const std::filesystem::filesystem_error & e)
-        {
-            std::cerr << "Filesystem error: " << e.what() << '\n';
-        }
 
-        randomDataAnalysis();
-        return 0;
-
+    randomDataAnalysis();
+    return 0;
 }
 
 void handleCurl(const char* env_MobyKey) {
@@ -88,8 +84,6 @@ void handleCurl(const char* env_MobyKey) {
 }
 
 void randomDataAnalysis() {
-
-
     using std::chrono::duration_cast;
     using ms = std::chrono::milliseconds;
     using clock = std::chrono::steady_clock;
