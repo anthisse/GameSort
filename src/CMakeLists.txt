@@ -19,7 +19,9 @@ add_executable (GameSort2
         buttons.h
         TextureManager.cpp
         TextureManager.h
-        buttons.cpp)
+        buttons.cpp
+        Title.h
+        Title.cpp)
 #set (SFML_STATIC_LIBRARIES TRUE)
 #set (SFML_DIR/opt/homebrew/lib/cmake/SFML/SFMLConfig.cmake)| include_directories (${SFML_INCLUDE_DIRS})
 

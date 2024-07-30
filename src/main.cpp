@@ -21,6 +21,7 @@
 #include "timsort.h"
 #include "buttons.h"
 #include "TextureManager.h"
+#include "Title.h"
 
 class apiException final : public std::runtime_error {
 public:
@@ -34,17 +35,37 @@ void randomDataAnalysis();
 
 int main() {
     ////// sfml /////
-    sf::RenderWindow welcomeWindow(sf::VideoMode(800, 600), "GameSort", sf::Style::Close);
+    sf::RenderWindow welcomeWindow(sf::VideoMode(1300, 700), "GameSort", sf::Style::Close);
     welcomeWindow.setMouseCursorVisible(true);
     welcomeWindow.setKeyRepeatEnabled(true);
 
-    Buttons arrowNextButton("arrowNext", (25 * 32) - 240, 32 * (16 + 0.5f));
-    Buttons arrowPreviousButton("arrowPrevious", ((25 / 2.0f) * 32) - 32, 32 * (16 + 0.5f));
+    sf::Font font;
+    if (!font.loadFromFile("font.ttf")) {
+        std::cout << "can't load font :(" << std::endl;
+        return 1;
+    }
 
-    sf::RectangleShape cursor;
-    cursor.setSize(sf::Vector2f(2, 20));
-    cursor.setFillColor(sf::Color::Black);
-    cursor.setPosition((800 / 2.0f), (600 / 2.0f) - 45);
+    Text welcomeText("Game Sort", font, 35, sf::Text::Underlined, sf::Text::Bold, sf::Color::Blue, sf::Vector2f(250 / 2.0f, (380 / 2.0f) - 150));
+
+    //Buttons arrowNextButton("arrowNext", (25 * 45) - 180, 20 * (16 + 0.5f));
+    //Buttons arrowPreviousButton("arrowPrevious", ((25 / 2.0f) * 5) - 32, 20 * (16 + 0.5f));
+
+    sf::Texture &nextArrowTexture = TextureManager::getTexture("arrowNext");
+    sf::Sprite nextArrowSprite;
+    nextArrowSprite.setTexture(nextArrowTexture);
+    nextArrowSprite.setScale(0.25, 0.25);                    // have to scale it down so it fits in the window bc big image
+    nextArrowSprite.setOrigin(nextArrowTexture.getSize().x / 2.0f, nextArrowTexture.getSize().y / 2.0f);               // set it somewhere we want on screen
+    nextArrowSprite.setPosition(1250, 650);
+
+    sf::Texture &previousArrowTexture = TextureManager::getTexture("arrowPrevious");
+    sf::Sprite previousArrowSprite;
+    previousArrowSprite.setTexture(previousArrowTexture);
+    previousArrowSprite.setScale(0.25, 0.25);                    // have to scale it down so it fits in the window bc big image
+    previousArrowSprite.setOrigin(previousArrowTexture.getSize().x / 2.0f, previousArrowTexture.getSize().y / 2.0f);               // set it somewhere we want on screen
+    previousArrowSprite.setPosition(1150, 650);
+
+    bool pressedNextArrow = false;
+    bool pressedPreviousArrow = false;
 
     while (welcomeWindow.isOpen()) {
         sf::Event Event;
@@ -53,8 +74,31 @@ int main() {
                 welcomeWindow.close();
             }
 
-            welcomeWindow.clear(sf::Color::White);
-            welcomeWindow.draw(cursor);
+            else if (Event.type == sf::Event::MouseButtonPressed) {
+                sf::Vector2i mouse;                 // 2-dimensional vector of floating point coordinates x,y
+                mouse = sf::Mouse::getPosition(welcomeWindow);             // Storing the values of where the event occurred in window
+
+                if (nextArrowSprite.getGlobalBounds().contains(welcomeWindow.mapPixelToCoords(mouse))) {
+                    pressedNextArrow =! pressedNextArrow;
+                }
+                if (previousArrowSprite.getGlobalBounds().contains(welcomeWindow.mapPixelToCoords(mouse))) {
+                    pressedPreviousArrow =! pressedPreviousArrow;
+                }
+        }
+
+            welcomeWindow.clear(sf::Color(200, 100, 50));
+            welcomeWindow.draw(nextArrowSprite);
+            welcomeWindow.draw(previousArrowSprite);
+            welcomeWindow.draw(welcomeText.getText());
+
+            if (pressedNextArrow) {                     // if forward arrow pressed, go forward in list of games
+                welcomeWindow.clear();
+            }
+
+            if (pressedPreviousArrow) {                 // if back arrow pressed, go back in list of games
+                welcomeWindow.clear();
+            }
+
             welcomeWindow.display();
         }
     }
