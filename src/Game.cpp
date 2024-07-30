@@ -1,4 +1,4 @@
-#include "Game.h"
+#include "Game.hpp"
 
 bool Game::compareTitles(const Game* const lhs, const Game* const rhs) {
     return (lhs->title < rhs->title);

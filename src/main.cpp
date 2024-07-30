@@ -13,7 +13,7 @@
 #include <SFML/config.hpp>
 #include <SFML/Graphics.hpp>
 
-#include "Game.h"
+#include "Game.hpp"
 
 // Parse json files. Provided by https://github.com/simdjson/simdjson
 #include "simdjson.h"
@@ -58,7 +58,6 @@ int main() {
     randomDataAnalysis();
     return 0;
 }
-
 void handleCurl(const char* env_MobyKey) {
     std::string url = "https://api.mobygames.com/v1/games?api_key=" + std::string(env_MobyKey);
     printf("url is %s", url.c_str());

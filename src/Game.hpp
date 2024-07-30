@@ -1,5 +1,5 @@
-#ifndef GAMEDATA_H
-#define GAMEDATA_H
+#ifndef GAME_H
+#define GAME_H
 
 #include <string>
 #include <vector>
@@ -19,4 +19,4 @@ struct Game {
 };
 
 
-#endif //GAMEDATA_H
+#endif //GAME_H

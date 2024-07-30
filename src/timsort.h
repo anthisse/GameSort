@@ -2,7 +2,7 @@
 #define TIMSORT_H
 
 #include <vector>
-#include "Game.h"
+#include "Game.hpp"
 
 namespace ts {
     /**
@@ -78,7 +78,7 @@ namespace ts {
      * vector of game pointers.
      *
      * This is tightly coupled to std::vector. To fix this, the algorithm
-     * needs to be rewritten to take in iterators, similar to how std::sort
+     * needs to be rewritten to use iterators, similar to how std::sort
      * and std::stable_sort work.
      *
      * Average computational complexity: O(n log(n))
