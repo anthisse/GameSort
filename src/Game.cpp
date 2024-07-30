@@ -1,13 +1,13 @@
 #include "Game.hpp"
 
-bool Game::compareTitles(const Game* const lhs, const Game* const rhs) {
-    return (lhs->title < rhs->title);
+inline bool Game::compareTitles(const Game* const lhs, const Game* const rhs) {
+    return (lhs->title_ < rhs->title_);
 }
 
-bool Game::compareScores(const Game* const lhs, const Game* const rhs) {
-    return (lhs->reviewScore < rhs->reviewScore);
+inline bool Game::compareScores(const Game* const lhs, const Game* const rhs) {
+    return (lhs->score_ < rhs->score_);
 }
 
-bool Game::compareGenres(const Game* const lhs, const Game* const rhs) {
-    return (lhs->genre < rhs->genre);
+inline bool Game::compareGenres(const Game* const lhs, const Game* const rhs) {
+    return (lhs->genre_ < rhs->genre_);
 }
