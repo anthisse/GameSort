@@ -1,7 +1,7 @@
 #include <algorithm>
 #include <vector>
 
-#include "timsort.h"
+#include "timsort.hpp"
 
 namespace ts {
     void binaryInsertionSort(std::vector<Game*>& games, bool (*comparator)(const Game* lhs, const Game* rhs)) {
