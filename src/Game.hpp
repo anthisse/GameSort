@@ -29,13 +29,15 @@ public:
 
     static bool compareTitles(const Game* lhs, const Game* rhs);
 
+    static bool compareGenres(const Game* lhs, const Game* rhs);
+
     static bool compareScores(const Game* lhs, const Game* rhs);
 
-    static bool compareGenres(const Game* lhs, const Game* rhs);
+    static bool comparePlatform(const Game* lhs, const Game* rhs);
 
 private:
     std::string title_;
-    std::vector<std::string> genres;
+    std::vector<std::string> genres_;
     double score_ = 0.0F;
     std::string platform;
 };

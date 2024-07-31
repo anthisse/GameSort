@@ -3,7 +3,7 @@
 
 Game::Game(std::string title, std::vector<std::string> genres, const double score, std::string platform) {
     this->title_ = std::move(title);
-    this->genres = std::move(genres);
+    this->genres_ = std::move(genres);
     this->score_ = score;
     this->platform = std::move(platform);
 }
@@ -13,7 +13,7 @@ std::string Game::get_title() const {
 }
 
 std::vector<std::string> Game::get_genres() const {
-    return this->genres;
+    return this->genres_;
 }
 
 double Game::get_score() const {
@@ -29,7 +29,7 @@ void Game::set_title(std::string title) {
 }
 
 void Game::set_genres(std::vector<std::string> genres) {
-    this->genres = std::move(genres);
+    this->genres_ = std::move(genres);
 }
 
 void Game::set_score(const double score) {
@@ -40,11 +40,17 @@ void Game::set_platform(std::string platform) {
     this->platform = std::move(platform);
 }
 
-bool Game::compareTitles(const Game* const lhs, const Game* const rhs) {
+
+bool Game::compareTitles(const Game* lhs, const Game* rhs) {
     return (lhs->title_ < rhs->title_);
 }
 
 bool Game::compareGenres(const Game* const lhs, const Game* const rhs) {
+    return (lhs->genres_ < rhs->genres_);
+}
+
+// TODO should probably conver to lowercase before comparison
+bool Game::comparePlatform(const Game* const lhs, const Game* const rhs) {
     return (lhs->platform < rhs->platform);
 }
 
