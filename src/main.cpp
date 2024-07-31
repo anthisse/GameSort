@@ -6,9 +6,6 @@
 #include <random>
 #include <string>
 
-// Libcurl C library. Fetch information from a URL.
-#include <curl/curl.h>
-
 // SFML. Graphics library.
 #include <SFML/config.hpp>
 #include <SFML/Graphics.hpp>
@@ -197,7 +194,7 @@ std::vector<std::string> getGenres(simdjson::simdjson_result<simdjson::ondemand:
     return genres;
 }
 
-void handleCurl(const char* env_MobyKey) {
+/*void handleCurl(const char* env_MobyKey) {
     std::string url = "https://api.mobygames.com/v1/games?api_key=" + std::string(env_MobyKey);
     printf("url is %s", url.c_str());
     CURL* curl_handle;
@@ -206,20 +203,20 @@ void handleCurl(const char* env_MobyKey) {
     curl_handle = curl_easy_init();
     if (curl_handle) {
         curl_easy_setopt(curl_handle, CURLOPT_URL, url.c_str());
-        /* example.com is redirected, so we tell libcurl to follow redirection */
+        /* example.com is redirected, so we tell libcurl to follow redirection #1#
         curl_easy_setopt(curl_handle, CURLOPT_FOLLOWLOCATION, 1L);
 
-        /* Perform the request, res gets the return code */
+        /* Perform the request, res gets the return code #1#
         res = curl_easy_perform(curl_handle);
-        /* Check for errors */
+        /* Check for errors #1#
         if (res != CURLE_OK) {
             fprintf(stderr, "curl_easy_perform() failed: %s\n",
                     curl_easy_strerror(res));
         }
-        /* always cleanup */
+        /* always cleanup #1#
         curl_easy_cleanup(curl_handle);
     }
-}
+}*/
 
 void print_stats(const std::vector<Game*>& data) {
     std::cout << "Sorted array's first element: ";
@@ -295,9 +292,9 @@ void dataAnalysis(std::vector<Game*>& data) {
 // Ignore games that are possibly offensive
 bool isBlacklisted(const Game* game) {
     const std::vector<std::string> blacklist = getBlacklist();
+    std::string lowerTitle = game->get_title();
+    std::transform(lowerTitle.begin(), lowerTitle.end(), lowerTitle.begin(), ::tolower);
     for (const auto& word : blacklist) {
-        std::string lowerTitle = game->get_title();
-        std::ranges::transform(lowerTitle.begin(), lowerTitle.end(), lowerTitle.begin(), tolower);
         if (game->get_title().find(word) != std::string::npos) {
             return true;
         }
