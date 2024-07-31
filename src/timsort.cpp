@@ -1,24 +1,22 @@
 #include <algorithm>
 #include <vector>
 
-#include "timsort.h"
-#include "Game.h"
+#include "timsort.hpp"
 
 namespace ts {
     void binaryInsertionSort(std::vector<Game*>& games, bool (*comparator)(const Game* lhs, const Game* rhs)) {
         for (ssize_t leftUnsorted = 1; leftUnsorted < static_cast<ssize_t>(games.size()); leftUnsorted++) {
             // The key is the first unsorted element
             Game* key = games[leftUnsorted];
-            // Search for the appropriate key location with binary search. std::lower_bound required for sort stability
-            // static_cast<ssize_t> is fine, we won't have more than 500,000 items
-            const ssize_t targetIndex = (std::lower_bound(games.begin(), games.begin() + leftUnsorted, key,
-                                                          comparator) - games.begin());
 
-            // Shift elements. Faster than linear shifting
+            // Search for the appropriate key location with binary search using std::lower_bound for sort stability
+            const ssize_t targetIndex = (std::lower_bound(games.begin(), games.begin() + leftUnsorted, key, comparator) - games.begin());
+
+            // Shift elements to the right if necessary
             if (targetIndex < leftUnsorted) {
-                // Shift everything after the key's index
                 std::shift_right(games.begin() + targetIndex, games.begin() + leftUnsorted + 1, 1);
             }
+
             // Move the key to the correct position
             games[targetIndex] = key;
         }
