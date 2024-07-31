@@ -17,7 +17,7 @@
 
 // Parse json files. Provided by https://github.com/simdjson/simdjson
 #include "simdjson.h"
-#include "timsort.h"
+#include "timsort.hpp"
 
 class apiException final : public std::runtime_error {
 public:
@@ -26,7 +26,13 @@ public:
 
 void handleCurl(const char* env_MobyKey);
 
-void randomDataAnalysis();
+void dataAnalysis(std::vector<Game*>& data);
+
+std::vector<Game*> parseJsons();
+
+std::vector<std::string> getGenres(simdjson::simdjson_result<simdjson::ondemand::value> json);
+
+bool isVulgar(const Game* game);
 
 int main() {
     const char* env_MobyKey = std::getenv("MOBY_KEY");
@@ -37,27 +43,83 @@ int main() {
     // TODO terrible function name, refactor later
     // handleCurl(env_MobyKey);
 
-
-    const std::string platformPath = "../games/platforms";
-    try {
-        std::filesystem::directory_iterator dirIt(platformPath);
-        std::vector<std::filesystem::directory_entry> files;
-        for (const auto& entry : dirIt) {
-            std::ifstream file(entry.path());
-            files.push_back(entry);
-        }
-
-        std::vector<Game*> games;
-        for (const auto& entry : files) {
-            std::cout << "file: " << entry.path().filename().string() << '\n';
-        }
-    } catch (const std::filesystem::filesystem_error& e) {
-        std::cerr << "Filesystem error: " << e.what() << '\n';
-    }
-
-    randomDataAnalysis();
+    puts("about to parse jsons");
+    std::vector<Game*> data = parseJsons();
+    puts("In main, here is the data vector: ");
+    dataAnalysis(data);
     return 0;
 }
+
+// Get blacklisted characters from csv
+std::vector<std::string> getBlacklist() {
+    const char* path = "../config/blacklist.csv";
+    std::ifstream file(path);
+    if (!file.is_open()) {
+        std::string msg = "Failed to find blacklist file at ";
+        msg.append(path);
+        throw (std::ifstream::failure(msg));
+    }
+    std::vector<std::string> blacklist;
+    std::string word;
+    while (!file.eof()) {
+        std::getline(file, word, ',');
+        blacklist.push_back(word);
+    }
+    return blacklist;
+}
+
+std::vector<Game*> parseJsons() {
+    using std::chrono::duration_cast;
+    using ms = std::chrono::milliseconds;
+    using clock = std::chrono::steady_clock;
+
+    std::vector<std::string> blacklist = getBlacklist();
+    auto start = clock::now();
+    std::vector<Game*> games;
+    // Iterate through each file and create Game objects
+    const char* platformPath = "../games/platforms/jsons/";
+    const std::filesystem::directory_iterator directoryIterator(platformPath);
+    simdjson::ondemand::parser parser;
+
+    for (const auto& entry : directoryIterator) {
+        auto json = simdjson::padded_string::load(entry.path().string());
+        simdjson::ondemand::document document = parser.iterate(json);
+        for (auto game_json : document) {
+            std::string title;
+            if (game_json["title"].is_string()) {
+                std::string_view titleView = game_json["title"].get_string();
+                title = std::string(titleView);
+            }
+            std::vector<std::string> genres = getGenres(game_json);
+            double score;
+            if (game_json["moby_score"].is_null()) {
+                score = 0.0F;
+            } else {
+                score = game_json["moby_score"].get_double();
+            }
+            std::string platform = entry.path().filename().replace_extension().string();
+            Game* game = new Game(title, genres, score, platform);
+            if (!isVulgar(game)) {
+                games.push_back(game);
+            }
+        }
+    }
+    std::cout << "Finished parsing in " << duration_cast<ms>(clock::now() - start) << '\n';
+    return games;
+}
+
+std::vector<std::string> getGenres(simdjson::simdjson_result<simdjson::ondemand::value> json) {
+    std::vector<std::string> genres;
+    for (auto result : json["genres"]) {
+        // Need to make sure that genres is a string before emplacing to avoid simdjson error
+        if (result.is_string()) {
+            std::string_view genreView = result.get_string();
+            genres.emplace_back(genreView);
+        }
+    }
+    return genres;
+}
+
 void handleCurl(const char* env_MobyKey) {
     std::string url = "https://api.mobygames.com/v1/games?api_key=" + std::string(env_MobyKey);
     printf("url is %s", url.c_str());
@@ -82,102 +144,92 @@ void handleCurl(const char* env_MobyKey) {
     }
 }
 
-void randomDataAnalysis() {
+void print_stats(std::vector<Game*>& data) {
+    std::cout << "Sorted array's first element: ";
+    std::cout << "Title: " << data.front()->get_title();
+    std::cout << ", Score: " << data.front()->get_score();
+    std::cout << ", Genre: \n";
+    for (const auto& genre : data.front()->get_genres()) {
+        std::cout << '\t' << genre << '\n';
+    }
+    std::cout << "Platform: " << data.front()->get_platform();
+    std::cout << '\n';
+    std::cout << "\nSorted array's last element: ";
+    std::cout << "Title: " << data.back()->get_title();
+    std::cout << ", Score: " << data.back()->get_score();
+    std::cout << ", Genre: \n";
+    for (const auto& genre : data.back()->get_genres()) {
+        std::cout << '\t' << genre << '\n';
+    }
+    std::cout << "Platform: " << data.back()->get_platform();
+    std::cout << std::endl << std::endl;
+}
+
+void dataAnalysis(std::vector<Game*>& data) {
     using std::chrono::duration_cast;
     using ms = std::chrono::milliseconds;
     using clock = std::chrono::steady_clock;
 
     std::random_device rd;
     std::mt19937 generator(rd());
-    std::uniform_real_distribution<float> reviewDistrib(1.0f, 5.0f);
-    std::uniform_int_distribution<int> charDistrib('0', 'z');
-    std::uniform_int_distribution<int> titleLengthDistrib(5, 25);
-    std::vector<std::string> platforms = {"Nintendo Switch", "Xbox One X", "PlayStation 5", "PC", "macOS", "Linux"};
-    std::uniform_int_distribution<int> platformLengthDistrib(1, 6);
-    std::uniform_int_distribution<int> platformDistrib(0, 1);
-
-    std::vector<Game*> data;
-    for (int n = 0; n != 200000; ++n) {
-        auto* game = new Game();
-        game->reviewScore = reviewDistrib(generator);
-        for (int i = 0; i < titleLengthDistrib(generator); i++) {
-            char randomChar = static_cast<char>(charDistrib(generator));
-            while ((randomChar >= ':' && randomChar <= '@') || (randomChar >= '[' && randomChar <= '`')) {
-                randomChar = static_cast<char>(charDistrib(generator));
-            }
-            game->title += randomChar;
-        }
-        data.push_back(game);
-    }
-
-    /*
-    std::random_device rd;
-    std::mt19937 generator(rd());
-    std::uniform_real_distribution reviewDistrib(1.0f, 5.0f);
-    std::uniform_int_distribution charDistrib('0', 'z');
-    std::uniform_int_distribution titleLengthDistrib(5, 25);
-    std::vector<std::string> platforms = {"Nintendo Switch", "Xbox One X", "PlayStation 5", "PC", "macOS", "Linux"};
-    std::uniform_int_distribution platformLengthDistrib(1, 6);
-    std::uniform_int_distribution platformDistrib(0, 1);
-
-    std::vector<Game*> data;
-    for (int n = 0; n != 200000; ++n) {
-        auto* game = new Game();
-        game->reviewScore = reviewDistrib(generator);
-        for (int i = 0; i < titleLengthDistrib(generator); i++) {
-            char randomChar = charDistrib(generator);
-            while ((randomChar >= ':' && randomChar <= '@') || (randomChar >= '[' && randomChar <= '`')) {
-                randomChar = charDistrib(generator);
-            }
-            game->title += randomChar;
-        }
-        data.push_back(game);
-    }
-     */
-
-
-    // TODO use timsort and merge sort instead of grailsort and std::stable_sort
-    puts("Sorting by review score, then by title: ");
+    std::ranges::shuffle(data.begin(), data.end(), generator);
+    puts("Sorting by title then score then platform:");
+    puts("================================");
 
     puts("Tim sorting...");
     auto start = clock::now();
     ts::timsort(data, Game::compareTitles);
     ts::timsort(data, Game::compareScores);
+    ts::timsort(data, Game::comparePlatform);
+
     auto elapsedTime = duration_cast<ms>(clock::now() - start);
-    std::cout << "Sorted array's first element:";
-    std::cout << data.front()->reviewScore << '\n';
-    std::cout << "Sorted array's last element: \n" << data.back()->reviewScore << '\n';
+
+    print_stats(data);
     std::cout << "Tim sort took " << elapsedTime.count() << " milliseconds.\n";
 
+    puts("shuffling");
     std::shuffle(data.begin(), data.end(), generator);
-    std::cout << "Unorted array's first element:";
-    std::cout << data.front()->reviewScore << '\n';
-    std::cout << "Unsorted array's last element: \n" << data.back()->reviewScore << '\n';
 
-    // TODO use timsort and merge sort instead of grailsort and std::stable_sort
+    puts("============================");
+    puts("stable_sort incoming");
     start = clock::now();
     std::stable_sort(data.begin(), data.end(), Game::compareTitles);
     std::stable_sort(data.begin(), data.end(), Game::compareScores);
+    std::stable_sort(data.begin(), data.end(), Game::comparePlatform);
     elapsedTime = duration_cast<ms>(clock::now() - start);
-    std::cout << "Sorted array's first element:";
-    std::cout << data.front()->reviewScore << '\n';
-    std::cout << "Sorted array's last element: \n" << data.back()->reviewScore << '\n';
+
+    print_stats(data);
     std::cout << "Stablesort took " << elapsedTime.count() << "milliseconds.\n";
 
+    puts("shuffling");
     std::shuffle(data.begin(), data.end(), generator);
-    std::cout << "Unorted array's first element:";
-    std::cout << data.front()->reviewScore << '\n';
-    std::cout << "Unsorted array's last element: \n" << data.back()->reviewScore << '\n';
 
+    puts("==============================");
     puts("Insertion sorting...");
     start = clock::now();
     ts::binaryInsertionSort(data, Game::compareTitles);
     ts::binaryInsertionSort(data, Game::compareScores);
+    ts::binaryInsertionSort(data, Game::comparePlatform);
     elapsedTime = duration_cast<ms>(clock::now() - start);
-    std::cout << "Sorted array's first element:";
-    std::cout << data.front()->reviewScore << '\n';
-    std::cout << "Sorted array's last element: \n" << data.back()->reviewScore << '\n';
+    print_stats(data);
     std::cout << "Insertion sort took " << elapsedTime.count() << " milliseconds.\n";
+}
 
-    std::shuffle(data.begin(), data.end(), generator);
+// Ignore games that are possibly offensive
+bool isVulgar(const Game* game) {
+    const std::vector<std::string> blacklist = getBlacklist();
+    for (const auto& word : blacklist) {
+        std::string lowerTitle = game->get_title();
+        std::ranges::transform(lowerTitle.begin(), lowerTitle.end(), lowerTitle.begin(), tolower);
+        if (game->get_title().find(word) != std::string::npos) {
+            return true;
+        }
+        // TODO fairly slow, replace with std::ranges::find
+        for (const auto& genre : game->get_genres()) {
+            if (genre == "Adult") {
+                return true;
+            }
+        }
+    }
+    return false;
 }

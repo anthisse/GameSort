@@ -27,6 +27,7 @@ public:
 
     void set_platform(std::string platform);
 
+    // Memory address is compared to resolve ties
     static bool compareTitles(const Game* lhs, const Game* rhs);
 
     static bool compareGenres(const Game* lhs, const Game* rhs);
@@ -39,7 +40,7 @@ private:
     std::string title_;
     std::vector<std::string> genres_;
     double score_ = 0.0F;
-    std::string platform;
+    std::string platform_;
 };
 
 

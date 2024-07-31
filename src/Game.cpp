@@ -1,11 +1,12 @@
 #include "Game.hpp"
 
+#include <algorithm>
 
 Game::Game(std::string title, std::vector<std::string> genres, const double score, std::string platform) {
     this->title_ = std::move(title);
     this->genres_ = std::move(genres);
     this->score_ = score;
-    this->platform = std::move(platform);
+    this->platform_ = std::move(platform);
 }
 
 std::string Game::get_title() const {
@@ -21,7 +22,7 @@ double Game::get_score() const {
 }
 
 std::string Game::get_platform() const {
-    return this->platform;
+    return this->platform_;
 }
 
 void Game::set_title(std::string title) {
@@ -37,23 +38,45 @@ void Game::set_score(const double score) {
 }
 
 void Game::set_platform(std::string platform) {
-    this->platform = std::move(platform);
+    this->platform_ = std::move(platform);
 }
 
-
 bool Game::compareTitles(const Game* lhs, const Game* rhs) {
-    return (lhs->title_ < rhs->title_);
+    // Convert to lowercase first to make the comparison case-insensitive
+    std::string leftLowerTitle = lhs->title_;
+    std::string rightLowerTitle = rhs->title_;
+    std::ranges::transform(leftLowerTitle.begin(), leftLowerTitle.end(), leftLowerTitle.begin(), tolower);
+    std::ranges::transform(rightLowerTitle.begin(), rightLowerTitle.end(), rightLowerTitle.begin(), tolower);
+    // Use memory address to resolve ties, which helps with sorting stability
+    if (leftLowerTitle == rightLowerTitle) {
+        return lhs < rhs;
+    }
+    return (leftLowerTitle < rightLowerTitle);
 }
 
 bool Game::compareGenres(const Game* const lhs, const Game* const rhs) {
+    if (lhs->genres_ == rhs->genres_) {
+        return lhs < rhs;
+    }
     return (lhs->genres_ < rhs->genres_);
 }
 
-// TODO should probably conver to lowercase before comparison
 bool Game::comparePlatform(const Game* const lhs, const Game* const rhs) {
-    return (lhs->platform < rhs->platform);
+    // Convert to lowercase first to make the comparison case-insensitive
+    std::string leftLowerPlatform = lhs->platform_;
+    std::string rightLowerPlatform = rhs->platform_;
+    std::ranges::transform(leftLowerPlatform.begin(), leftLowerPlatform.end(), leftLowerPlatform.begin(), tolower);
+    std::ranges::transform(rightLowerPlatform.begin(), rightLowerPlatform.end(), rightLowerPlatform.begin(), tolower);
+    // Use memory address to resolve ties, which helps with sorting stability
+    if (leftLowerPlatform == rightLowerPlatform) {
+        return lhs < rhs;
+    }
+    return (leftLowerPlatform < rightLowerPlatform);
 }
 
 bool Game::compareScores(const Game* const lhs, const Game* const rhs) {
+    if (lhs->score_ == rhs->score_) {
+        return lhs->score_ < rhs->score_;
+    }
     return (lhs->score_ < rhs->score_);
 }
