@@ -18,6 +18,9 @@
 // Parse json files. Provided by https://github.com/simdjson/simdjson
 #include "simdjson.h"
 #include "timsort.hpp"
+#include "buttons.h"
+#include "TextureManager.h"
+#include "Title.h"
 
 class apiException final : public std::runtime_error {
 public:
@@ -35,10 +38,84 @@ std::vector<std::string> getGenres(simdjson::simdjson_result<simdjson::ondemand:
 bool isBlacklisted(const Game* game);
 
 int main() {
-    const char* env_MobyKey = std::getenv("MOBY_KEY");
-    if (!env_MobyKey) {
-        throw apiException();
+    ////// sfml /////
+    sf::RenderWindow welcomeWindow(sf::VideoMode(1300, 700), "GameSort", sf::Style::Close);
+    welcomeWindow.setMouseCursorVisible(true);
+    welcomeWindow.setKeyRepeatEnabled(true);
+
+    sf::Font font;
+    if (!font.loadFromFile("font.ttf")) {
+        std::cout << "can't load font :(" << std::endl;
+        return 1;
     }
+
+    Text welcomeText("Game Sort", font, 35, sf::Text::Underlined, sf::Text::Bold, sf::Color::Blue, sf::Vector2f(250 / 2.0f, (380 / 2.0f) - 150));
+
+    //Buttons arrowNextButton("arrowNext", (25 * 45) - 180, 20 * (16 + 0.5f));
+    //Buttons arrowPreviousButton("arrowPrevious", ((25 / 2.0f) * 5) - 32, 20 * (16 + 0.5f));
+
+    sf::Texture &nextArrowTexture = TextureManager::getTexture("arrowNext");
+    sf::Sprite nextArrowSprite;
+    nextArrowSprite.setTexture(nextArrowTexture);
+    nextArrowSprite.setScale(0.25, 0.25);                    // have to scale it down so it fits in the window bc big image
+    nextArrowSprite.setOrigin(nextArrowTexture.getSize().x / 2.0f, nextArrowTexture.getSize().y / 2.0f);               // set it somewhere we want on screen
+    nextArrowSprite.setPosition(1250, 650);
+
+    sf::Texture &previousArrowTexture = TextureManager::getTexture("arrowPrevious");
+    sf::Sprite previousArrowSprite;
+    previousArrowSprite.setTexture(previousArrowTexture);
+    previousArrowSprite.setScale(0.25, 0.25);                    // have to scale it down so it fits in the window bc big image
+    previousArrowSprite.setOrigin(previousArrowTexture.getSize().x / 2.0f, previousArrowTexture.getSize().y / 2.0f);               // set it somewhere we want on screen
+    previousArrowSprite.setPosition(1150, 650);
+
+    bool pressedNextArrow = false;
+    bool pressedPreviousArrow = false;
+
+    while (welcomeWindow.isOpen()) {
+        sf::Event Event;
+        while (welcomeWindow.pollEvent(Event)) {
+            if (Event.type == sf::Event::Closed) {                      // Click X on the window
+                welcomeWindow.close();
+            }
+
+            else if (Event.type == sf::Event::MouseButtonPressed) {
+                sf::Vector2i mouse;                 // 2-dimensional vector of floating point coordinates x,y
+                mouse = sf::Mouse::getPosition(welcomeWindow);             // Storing the values of where the event occurred in window
+
+                if (nextArrowSprite.getGlobalBounds().contains(welcomeWindow.mapPixelToCoords(mouse))) {
+                    pressedNextArrow =! pressedNextArrow;
+                }
+                if (previousArrowSprite.getGlobalBounds().contains(welcomeWindow.mapPixelToCoords(mouse))) {
+                    pressedPreviousArrow =! pressedPreviousArrow;
+                }
+        }
+
+            welcomeWindow.clear(sf::Color(200, 100, 50));
+            welcomeWindow.draw(nextArrowSprite);
+            welcomeWindow.draw(previousArrowSprite);
+            welcomeWindow.draw(welcomeText.getText());
+
+            if (pressedNextArrow) {                     // if forward arrow pressed, go forward in list of games
+                welcomeWindow.clear();
+            }
+
+            if (pressedPreviousArrow) {                 // if back arrow pressed, go back in list of games
+                welcomeWindow.clear();
+            }
+
+            welcomeWindow.display();
+        }
+    }
+
+    //// end sfml /////
+
+
+
+
+        const char* env_MobyKey = std::getenv("MOBY_KEY");
+        if (!env_MobyKey) {
+            throw apiException();
+        }
 
     // TODO terrible function name, refactor later
     // handleCurl(env_MobyKey);
