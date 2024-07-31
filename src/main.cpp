@@ -32,7 +32,7 @@ std::vector<Game*> parseJsons();
 
 std::vector<std::string> getGenres(simdjson::simdjson_result<simdjson::ondemand::value> json);
 
-bool isVulgar(const Game* game);
+bool isBlacklisted(const Game* game);
 
 int main() {
     const char* env_MobyKey = std::getenv("MOBY_KEY");
@@ -99,7 +99,7 @@ std::vector<Game*> parseJsons() {
             }
             std::string platform = entry.path().filename().replace_extension().string();
             Game* game = new Game(title, genres, score, platform);
-            if (!isVulgar(game)) {
+            if (!isBlacklisted(game)) {
                 games.push_back(game);
             }
         }
@@ -216,7 +216,7 @@ void dataAnalysis(std::vector<Game*>& data) {
 }
 
 // Ignore games that are possibly offensive
-bool isVulgar(const Game* game) {
+bool isBlacklisted(const Game* game) {
     const std::vector<std::string> blacklist = getBlacklist();
     for (const auto& word : blacklist) {
         std::string lowerTitle = game->get_title();
