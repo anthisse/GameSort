@@ -144,7 +144,7 @@ void handleCurl(const char* env_MobyKey) {
     }
 }
 
-void print_stats(std::vector<Game*>& data) {
+void print_stats(const std::vector<Game*>& data) {
     std::cout << "Sorted array's first element: ";
     std::cout << "Title: " << data.front()->get_title();
     std::cout << ", Score: " << data.front()->get_score();
@@ -188,21 +188,21 @@ void dataAnalysis(std::vector<Game*>& data) {
     std::cout << "Tim sort took " << elapsedTime.count() << " milliseconds.\n";
 
     puts("shuffling");
-    std::shuffle(data.begin(), data.end(), generator);
+    std::ranges::shuffle(data.begin(), data.end(), generator);
 
     puts("============================");
     puts("stable_sort incoming");
     start = clock::now();
-    std::stable_sort(data.begin(), data.end(), Game::compareTitles);
-    std::stable_sort(data.begin(), data.end(), Game::compareScores);
-    std::stable_sort(data.begin(), data.end(), Game::comparePlatform);
+    std::ranges::stable_sort(data.begin(), data.end(), Game::compareTitles);
+    std::ranges::stable_sort(data.begin(), data.end(), Game::compareScores);
+    std::ranges::stable_sort(data.begin(), data.end(), Game::comparePlatform);
     elapsedTime = duration_cast<ms>(clock::now() - start);
 
     print_stats(data);
     std::cout << "Stablesort took " << elapsedTime.count() << "milliseconds.\n";
 
     puts("shuffling");
-    std::shuffle(data.begin(), data.end(), generator);
+    std::ranges::shuffle(data.begin(), data.end(), generator);
 
     puts("==============================");
     puts("Insertion sorting...");
