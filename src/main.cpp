@@ -39,10 +39,7 @@ int main(int argc, char** argv) {
         throw apiException();
     }
 
-    // TODO terrible function name, refactor later
-    // handleCurl(env_MobyKey);
-
-    puts("about to parse jsons");
+    puts("parsing jsons");
     std::vector<Game*> data = parseJsons();
     dataAnalysis(data);
 
@@ -82,7 +79,7 @@ int main(int argc, char** argv) {
     bool pressedPreviousArrow = false;
 
     while (welcomeWindow.isOpen()) {
-        sf::Event Event;
+        sf::Event Event {};
         while (welcomeWindow.pollEvent(Event)) {
             if (Event.type == sf::Event::Closed) {
                 // Click X on the window
@@ -277,7 +274,7 @@ void dataAnalysis(std::vector<Game*>& data) {
 // Ignore games that are possibly offensive
 bool isBlacklisted(const Game* game, const std::vector<std::string>& blacklist) {
     std::string lowerTitle = game->get_title();
-    std::transform(lowerTitle.begin(), lowerTitle.end(), lowerTitle.begin(), ::tolower);
+    std::ranges::transform(lowerTitle.begin(), lowerTitle.end(), lowerTitle.begin(), ::tolower);
     for (const auto& word : blacklist) {
         if (game->get_title().find(word) != std::string::npos) {
             return true;
