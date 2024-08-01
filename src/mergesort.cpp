@@ -4,11 +4,9 @@
 using namespace std;
 
 namespace ms {
-
 	void mergeSort(vector<Game*>& games, bool (*lessThanComparator)(const Game* lhs, const Game* rhs)) {
 		// call recursive merge sort w/ entire game range
 		_recursiveMergeSort(games, 0, games.size() - 1, lessThanComparator);
-
 	}
 
 	// recursivly divide the vector 

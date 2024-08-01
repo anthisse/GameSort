@@ -1,11 +1,6 @@
 #pragma once
-
-#ifndef MERGESORT_H
-#define MERGESORT_H
-
-
 #include <vector>
-#include "Game.h"
+#include "Game.hpp"
 
 #include <iostream>
 
@@ -13,7 +8,6 @@ using namespace std;
 
 
 namespace ms {
-
 	// this functions starts the recursive merge sort
 	void mergeSort(vector<Game*>& games, bool(*lessThanComparator)
 		(const Game* lhs, const Game* rhs));
@@ -26,14 +20,4 @@ namespace ms {
 	// recursively divides the vector into halves until each segment length = 1
 	void _recursiveMergeSort(vector<Game*>& games, int left, int right, 
 		bool(*lessThanComparator)(const Game* lhs, const Game* rhs));
-
-
-
 }
-
-class mergesort
-{
-
-
-};
-

@@ -12,11 +12,11 @@ FetchContent_MakeAvailable(SFML)
 
 add_executable(GameSort
         src/main.cpp
-        lib/simdjson.h
-        lib/simdjson.cpp
-        src/timsort.hpp
         src/Game.cpp
         src/Game.hpp
+        src/mergesort.h
+        src/mergesort.cpp
+        src/timsort.hpp
         src/timsort.cpp
         src/TextureManager.h
         src/TextureManager.cpp
@@ -24,7 +24,8 @@ add_executable(GameSort
         src/buttons.cpp
         src/Title.h
         src/Title.cpp
-
+        lib/simdjson.h
+        lib/simdjson.cpp
 )
 
 target_link_libraries(GameSort PRIVATE sfml-graphics)
