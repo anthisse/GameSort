@@ -41,8 +41,8 @@ int main(int argc, char** argv) {
     }
 
     puts("parsing jsons");
-    std::vector<Game*> data = parseJsons();
-    dataAnalysis(data);
+    // std::vector<Game*> data = parseJsons();
+    // dataAnalysis(data);
 
     // SFML
     sf::RenderWindow welcomeWindow(sf::VideoMode(1300, 700), "GameSort", sf::Style::Close);
