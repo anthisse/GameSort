@@ -41,37 +41,38 @@ void Game::set_platform(std::string platform) {
     this->platform_ = std::move(platform);
 }
 
+// Enforce stability by comparing the platforms if the titles are the same
+// Technically, this won't work if both fields are the same, but our data shouldn't have duplicate games anyway
 bool Game::compareTitles(const Game* lhs, const Game* rhs) {
-    // Use memory address to resolve ties, which helps with sorting stability
     if (lhs->title_ == rhs->title_) {
-        return lhs < rhs;
+        return lhs->platform_ < rhs->platform_;
     }
     return lhs->title_ < rhs->title_;
 }
 
+// For the rest of the comparisons, use the title as a tie-breaker
 bool Game::compareGenres(const Game* const lhs, const Game* const rhs) {
     if (lhs->genres_ == rhs->genres_) {
-        return lhs < rhs;
+        return lhs->title_ < rhs->title_;
     }
     return lhs->genres_ < rhs->genres_;
 }
 
 bool Game::comparePlatform(const Game* const lhs, const Game* const rhs) {
+    if (lhs->platform_ == rhs->platform_) {
+        return lhs->title_ < rhs->title_;
+    }
     // Convert to lowercase first to make the comparison case-insensitive
     std::string leftLowerPlatform = lhs->platform_;
     std::string rightLowerPlatform = rhs->platform_;
     std::ranges::transform(leftLowerPlatform.begin(), leftLowerPlatform.end(), leftLowerPlatform.begin(), tolower);
     std::ranges::transform(rightLowerPlatform.begin(), rightLowerPlatform.end(), rightLowerPlatform.begin(), tolower);
-    // Use memory address to resolve ties, which helps with sorting stability
-    if (leftLowerPlatform == rightLowerPlatform) {
-        return lhs < rhs;
-    }
     return (leftLowerPlatform < rightLowerPlatform);
 }
 
 bool Game::compareScores(const Game* const lhs, const Game* const rhs) {
     if (lhs->score_ == rhs->score_) {
-        return lhs->score_ < rhs->score_;
+        return lhs->title_ < rhs->title_;
     }
     return (lhs->score_ < rhs->score_);
 }
