@@ -1,11 +1,10 @@
 #pragma once
 #include <unordered_map>
 #include <SFML/Graphics.hpp>
-using namespace std;
 
 class TextureManager {
-    static unordered_map<string, sf::Texture> textures;
+    static std::unordered_map<std::string, sf::Texture> textures;
 
 public:
-    static sf::Texture& getTexture(string textureName);
+    static sf::Texture& getTexture(std::string textureName);
 };

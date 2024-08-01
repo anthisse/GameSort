@@ -3,7 +3,7 @@
 #include "TextureManager.h"
 // code referenced by Elliot's minesweeper project
 
-unordered_map<string, sf::Texture> TextureManager::textures;
+std::unordered_map<std::string, sf::Texture> TextureManager::textures;
 
 sf::Texture& TextureManager::getTexture(std::string textureName) {
     auto result = textures.find(textureName);

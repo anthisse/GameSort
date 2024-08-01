@@ -1,16 +1,15 @@
 #include "mergesort.h"
 
 #include <iostream>
-using namespace std;
 
 namespace ms {
-	void mergeSort(vector<Game*>& games, bool (*lessThanComparator)(const Game* lhs, const Game* rhs)) {
+	void mergeSort(std::vector<Game*>& games, bool (*lessThanComparator)(const Game* lhs, const Game* rhs)) {
 		// call recursive merge sort w/ entire game range
 		_recursiveMergeSort(games, 0, games.size() - 1, lessThanComparator);
 	}
 
 	// recursivly divide the vector 
-	void _recursiveMergeSort(vector<Game*>& games, int left, int right, bool (*lessThanComparator)(const Game* lhs, const Game* rhs)) {
+	void _recursiveMergeSort(std::vector<Game*>& games, int left, int right, bool (*lessThanComparator)(const Game* lhs, const Game* rhs)) {
 		// if segment is more than one
 		if (left < right) {
 			// calculate middle idx
@@ -23,7 +22,7 @@ namespace ms {
 	}
 
 
-	void _merge(vector<Game*>& games, int left, int mid, int right, bool (*lessThanComparator)(const Game* lhs, const Game* rhs)) {
+	void _merge(std::vector<Game*>& games, int left, int mid, int right, bool (*lessThanComparator)(const Game* lhs, const Game* rhs)) {
 		
 		// # of elements in the left array
 		int sizeLeft = mid - left + 1;
@@ -32,8 +31,8 @@ namespace ms {
 		int sizeRight = right - mid;
 
 		// temp vectors for left + right arrays
-		vector<Game*> leftGames(sizeLeft);
-		vector<Game*> rightGames(sizeRight);
+		std::vector<Game*> leftGames(sizeLeft);
+		std::vector<Game*> rightGames(sizeRight);
 
 		// copy the data to the temp arrays
 		for (int i = 0; i < sizeLeft; i++) {
