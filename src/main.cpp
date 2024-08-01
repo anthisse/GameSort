@@ -14,8 +14,6 @@
 
 // Parse json files. Provided by https://github.com/simdjson/simdjson
 #include "../lib/simdjson.h"
-
-
 #include "timsort.hpp"
 #include "buttons.h"
 #include "TextureManager.h"
@@ -25,8 +23,6 @@ class apiException final : public std::runtime_error {
 public:
     apiException() : std::runtime_error("Moby API key missing") {}
 };
-
-void handleCurl(const char* env_MobyKey);
 
 void dataAnalysis(std::vector<Game*>& data);
 
@@ -48,7 +44,6 @@ int main(int argc, char** argv) {
 
     puts("about to parse jsons");
     std::vector<Game*> data = parseJsons();
-    puts("In main, here is the data vector: ");
     dataAnalysis(data);
 
     // SFML
@@ -57,7 +52,7 @@ int main(int argc, char** argv) {
     welcomeWindow.setKeyRepeatEnabled(true);
 
     sf::Font font;
-    if (!font.loadFromFile("font.ttf")) {
+    if (!font.loadFromFile("../res/font.ttf")) {
         std::cout << "can't load font :(" << std::endl;
     }
 
@@ -111,17 +106,19 @@ int main(int argc, char** argv) {
             welcomeWindow.draw(welcomeText.getText());
 
             if (pressedNextArrow) {
-                // if forward arrow pressed, go forward in list of games
+                // TODO if forward arrow pressed, go forward in list of games
                 welcomeWindow.clear();
             }
 
             if (pressedPreviousArrow) {
-                // if back arrow pressed, go back in list of games
+                // TODO if back arrow pressed, go back in list of games
                 welcomeWindow.clear();
             }
 
             welcomeWindow.display();
         }
+        // Lock framerate to 60 to avoid high CPU consumption
+        sleep(sf::seconds(1.0F / 60.0F));
     }
 
     // //// end sfml /////
