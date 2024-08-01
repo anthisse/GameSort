@@ -13,7 +13,9 @@
 #include "Game.hpp"
 
 // Parse json files. Provided by https://github.com/simdjson/simdjson
-#include "simdjson.h"
+#include "../lib/simdjson.h"
+
+
 #include "timsort.hpp"
 #include "buttons.h"
 #include "TextureManager.h"

@@ -12,8 +12,8 @@ FetchContent_MakeAvailable(SFML)
 
 add_executable(GameSort
         src/main.cpp
-        src/simdjson.h
-        src/simdjson.cpp
+        lib/simdjson.h
+        lib/simdjson.cpp
         src/timsort.hpp
         src/Game.cpp
         src/Game.hpp
