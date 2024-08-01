@@ -182,7 +182,8 @@ std::vector<Game*> parseJsons() {
             }
         }
     }
-    std::cout << "Finished parsing in " << duration_cast<ms>(clock::now() - start) << '\n';
+    const auto elapsedTime = duration_cast<ms>(clock::now() - start);
+    printf("Finished parsing in %lli milliseconds.\n", elapsedTime.count());
     return games;
 }
 
@@ -253,7 +254,7 @@ void dataAnalysis(std::vector<Game*>& data) {
     elapsedTime = duration_cast<millis>(clock::now() - start);
 
     print_stats(data);
-    std::cout << "Tim sort took " << elapsedTime.count() << " milliseconds.\n";
+    printf("Tim sort took %lld milliseconds\n", elapsedTime.count());
 
     puts("shuffling");
     generator();
@@ -268,7 +269,7 @@ void dataAnalysis(std::vector<Game*>& data) {
     elapsedTime = duration_cast<millis>(clock::now() - start);
 
     print_stats(data);
-    std::cout << "Stablesort took " << elapsedTime.count() << "milliseconds.\n";
+    printf("std::stablesort took %lld milliseconds\n", elapsedTime.count());
 
     puts("shuffling");
     generator();
@@ -282,7 +283,7 @@ void dataAnalysis(std::vector<Game*>& data) {
     ts::binaryInsertionSort(data, Game::compareTitles);
     elapsedTime = duration_cast<millis>(clock::now() - start);
     print_stats(data);
-    std::cout << "Insertion sort took " << elapsedTime.count() << " milliseconds.\n";
+    printf("Binary insertion sort took %lld milliseconds\n", elapsedTime.count());
 }
 
 // Ignore games that are possibly offensive
