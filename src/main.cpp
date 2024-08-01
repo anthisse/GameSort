@@ -7,7 +7,7 @@
 #include <string>
 
 // SFML. Graphics library.
-#include <SFML/config.hpp>
+#include <SFML/Config.hpp>
 #include <SFML/Graphics.hpp>
 
 #include "Game.hpp"
@@ -41,8 +41,8 @@ int main(int argc, char** argv) {
     }
 
     puts("parsing jsons");
-    std::vector<Game*> data = parseJsons();
-    dataAnalysis(data);
+    //std::vector<Game*> data = parseJsons();
+    //dataAnalysis(data);
 
     // SFML
     sf::RenderWindow welcomeWindow(sf::VideoMode(1300, 700), "GameSort", sf::Style::Close);
@@ -54,8 +54,12 @@ int main(int argc, char** argv) {
         std::cout << "can't load font :(" << std::endl;
     }
 
-    Text welcomeText("Game Sort", font, 35, sf::Text::Underlined, sf::Text::Bold, sf::Color::Blue,
-                     sf::Vector2f(250 / 2.0f, (380 / 2.0f) - 150));
+    Text welcomeText("Game Sort", font, 35, sf::Text::Underlined, sf::Text::Bold, sf::Color::Blue,sf::Vector2f(250 / 2.0f, (380 / 2.0f) - 150));
+    Text sortGamesText("Order by:", font, 25, sf::Text::Underlined, sf::Text::Bold, sf::Color::Blue,sf::Vector2f(1150, (380 / 2.0f) - 150));
+    Text sortByTitleText("Title", font, 20, sf::Text::Bold, sf::Text::Bold, sf::Color::Blue,sf::Vector2f(1100, (580 / 2.0f) - 150));
+    Text sortByRatingText("Rating", font, 20, sf::Text::Bold, sf::Text::Bold, sf::Color::Blue,sf::Vector2f(1100, (780 / 2.0f) - 150));
+    Text sortByGenreText("Genre", font, 20, sf::Text::Bold, sf::Text::Bold, sf::Color::Blue,sf::Vector2f(1100, (980 / 2.0f) - 150));
+    Text sortByPlatformText("Platform", font, 20, sf::Text::Bold, sf::Text::Bold, sf::Color::Blue,sf::Vector2f(1100, (1180 / 2.0f) - 150));
 
     //Buttons arrowNextButton("arrowNext", (25 * 45) - 180, 20 * (16 + 0.5f));
     //Buttons arrowPreviousButton("arrowPrevious", ((25 / 2.0f) * 5) - 32, 20 * (16 + 0.5f));
@@ -76,8 +80,77 @@ int main(int argc, char** argv) {
     // set it somewhere we want on screen
     previousArrowSprite.setPosition(1150, 650);
 
+    sf::Texture& toggleOnTitleTexture = TextureManager::getTexture("toggleOn");
+    sf::Sprite toggleOnTitleSprite;
+    toggleOnTitleSprite.setTexture(toggleOnTitleTexture);
+    toggleOnTitleSprite.setScale(0.13, 0.13);           // have to scale it down so it fits in the window bc big image
+    toggleOnTitleSprite.setOrigin(toggleOnTitleTexture.getSize().x / 2.0f, toggleOnTitleTexture.getSize().y / 2.0f);
+    // set it somewhere we want on screen
+    toggleOnTitleSprite.setPosition(1225, 145);
+
+    sf::Texture& toggleOnRatingTexture = TextureManager::getTexture("toggleOn");
+    sf::Sprite toggleOnRatingSprite;
+    toggleOnRatingSprite.setTexture(toggleOnRatingTexture);
+    toggleOnRatingSprite.setScale(0.13, 0.13);           // have to scale it down so it fits in the window bc big image
+    toggleOnRatingSprite.setOrigin(toggleOnRatingTexture.getSize().x / 2.0f, toggleOnRatingTexture.getSize().y / 2.0f);
+    // set it somewhere we want on screen
+    toggleOnRatingSprite.setPosition(1225, 245);
+
+    sf::Texture& toggleOnGenreTexture = TextureManager::getTexture("toggleOn");
+    sf::Sprite toggleOnGenreSprite;
+    toggleOnGenreSprite.setTexture(toggleOnGenreTexture);
+    toggleOnGenreSprite.setScale(0.13, 0.13);           // have to scale it down so it fits in the window bc big image
+    toggleOnGenreSprite.setOrigin(toggleOnGenreTexture.getSize().x / 2.0f, toggleOnGenreTexture.getSize().y / 2.0f);
+    // set it somewhere we want on screen
+    toggleOnGenreSprite.setPosition(1225, 345);
+
+    sf::Texture& toggleOnPlatformTexture = TextureManager::getTexture("toggleOff");
+    sf::Sprite toggleOnPlatformSprite;
+    toggleOnPlatformSprite.setTexture(toggleOnPlatformTexture);
+    toggleOnPlatformSprite.setScale(0.13, 0.13);           // have to scale it down so it fits in the window bc big image
+    toggleOnPlatformSprite.setOrigin(toggleOnPlatformTexture.getSize().x / 2.0f, toggleOnPlatformTexture.getSize().y / 2.0f);
+    // set it somewhere we want on screen
+    toggleOnPlatformSprite.setPosition(1225, 445);
+
+    sf::Texture& toggleOffTitleTexture = TextureManager::getTexture("toggleOff");
+    sf::Sprite toggleOffTitleSprite;
+    toggleOffTitleSprite.setTexture(toggleOffTitleTexture);
+    toggleOffTitleSprite.setScale(0.13, 0.13);           // have to scale it down so it fits in the window bc big image
+    toggleOffTitleSprite.setOrigin(toggleOffTitleTexture.getSize().x / 2.0f, toggleOffTitleTexture.getSize().y / 2.0f);
+    // set it somewhere we want on screen
+    toggleOffTitleSprite.setPosition(1225, 145);
+
+    sf::Texture& toggleOffRatingTexture = TextureManager::getTexture("toggleOff");
+    sf::Sprite toggleOffRatingSprite;
+    toggleOffRatingSprite.setTexture(toggleOffRatingTexture);
+    toggleOffRatingSprite.setScale(0.13, 0.13);           // have to scale it down so it fits in the window bc big image
+    toggleOffRatingSprite.setOrigin(toggleOffRatingTexture.getSize().x / 2.0f, toggleOffRatingTexture.getSize().y / 2.0f);
+    // set it somewhere we want on screen
+    toggleOffRatingSprite.setPosition(1225, 245);
+
+    sf::Texture& toggleOffGenreTexture = TextureManager::getTexture("toggleOff");
+    sf::Sprite toggleOffGenreSprite;
+    toggleOffGenreSprite.setTexture(toggleOffGenreTexture);
+    toggleOffGenreSprite.setScale(0.13, 0.13);           // have to scale it down so it fits in the window bc big image
+    toggleOffGenreSprite.setOrigin(toggleOffGenreTexture.getSize().x / 2.0f, toggleOffGenreTexture.getSize().y / 2.0f);
+    // set it somewhere we want on screen
+    toggleOffGenreSprite.setPosition(1225, 345);
+
+    sf::Texture& toggleOffPlatformTexture = TextureManager::getTexture("toggleOff");
+    sf::Sprite toggleOffPlatformSprite;
+    toggleOffPlatformSprite.setTexture(toggleOffPlatformTexture);
+    toggleOffPlatformSprite.setScale(0.13, 0.13);           // have to scale it down so it fits in the window bc big image
+    toggleOffPlatformSprite.setOrigin(toggleOffPlatformTexture.getSize().x / 2.0f, toggleOffPlatformTexture.getSize().y / 2.0f);
+    // set it somewhere we want on screen
+    toggleOffPlatformSprite.setPosition(1225, 445);
+
+
     bool pressedNextArrow = false;
     bool pressedPreviousArrow = false;
+    bool pressedToggleOffTitle = false;
+    bool pressedToggleOffRating = false;
+    bool pressedToggleOffGenre = false;
+    bool pressedToggleOffPlatform = false;
 
     while (welcomeWindow.isOpen()) {
         sf::Event Event {};
@@ -96,22 +169,56 @@ int main(int argc, char** argv) {
                 if (previousArrowSprite.getGlobalBounds().contains(welcomeWindow.mapPixelToCoords(mouse))) {
                     pressedPreviousArrow = !pressedPreviousArrow;
                 }
+                if (toggleOffTitleSprite.getGlobalBounds().contains(welcomeWindow.mapPixelToCoords(mouse))) {              // Toggle between on and off buttons
+                    pressedToggleOffTitle = !pressedToggleOffTitle;
+                }
+                if (toggleOffRatingSprite.getGlobalBounds().contains(welcomeWindow.mapPixelToCoords(mouse))) {              // Toggle between on and off buttons
+                    pressedToggleOffRating = !pressedToggleOffRating;
+                }
+                if (toggleOffGenreSprite.getGlobalBounds().contains(welcomeWindow.mapPixelToCoords(mouse))) {              // Toggle between on and off buttons
+                    pressedToggleOffGenre = !pressedToggleOffGenre;
+                }
+                if (toggleOffPlatformSprite.getGlobalBounds().contains(welcomeWindow.mapPixelToCoords(mouse))) {              // Toggle between on and off buttons
+                    pressedToggleOffPlatform = !pressedToggleOffPlatform;
+                }
             }
 
+
             welcomeWindow.clear(sf::Color(200, 100, 50));
+            welcomeWindow.draw(toggleOffTitleSprite);
+            welcomeWindow.draw(toggleOffRatingSprite);
+            welcomeWindow.draw(toggleOffGenreSprite);
+            welcomeWindow.draw(toggleOffPlatformSprite);
             welcomeWindow.draw(nextArrowSprite);
             welcomeWindow.draw(previousArrowSprite);
             welcomeWindow.draw(welcomeText.getText());
+            welcomeWindow.draw(sortGamesText.getText());
+            welcomeWindow.draw(sortByGenreText.getText());
+            welcomeWindow.draw(sortByPlatformText.getText());
+            welcomeWindow.draw(sortByRatingText.getText());
+            welcomeWindow.draw(sortByTitleText.getText());
 
+            if (pressedToggleOffTitle) {                                // Toggle between on and off buttons
+                welcomeWindow.draw(toggleOnTitleSprite);
+            }
+            if (pressedToggleOffRating) {                               // Toggle between on and off buttons
+                welcomeWindow.draw(toggleOnRatingSprite);
+            }
+            if (pressedToggleOffGenre) {                                // Toggle between on and off buttons
+                welcomeWindow.draw(toggleOnGenreSprite);
+            }
+            if (pressedToggleOffPlatform) {                             // Toggle between on and off buttons
+                welcomeWindow.draw(toggleOnPlatformSprite);
+            }
             if (pressedNextArrow) {
                 // TODO if forward arrow pressed, go forward in list of games
                 welcomeWindow.clear();
             }
-
             if (pressedPreviousArrow) {
                 // TODO if back arrow pressed, go back in list of games
                 welcomeWindow.clear();
             }
+
 
             welcomeWindow.display();
         }
@@ -182,7 +289,7 @@ std::vector<Game*> parseJsons() {
             }
         }
     }
-    std::cout << "Finished parsing in " << duration_cast<ms>(clock::now() - start) << '\n';
+    //std::cout << "Finished parsing in " << duration_cast<ms>(clock::now() - start) << '\n';
     return games;
 }
 
