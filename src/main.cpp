@@ -16,6 +16,7 @@
 #include "../lib/simdjson.h"
 #include "timsort.hpp"
 #include "buttons.h"
+#include "mergesort.h"
 #include "TextureManager.h"
 #include "Title.h"
 
@@ -221,7 +222,7 @@ void print_stats(const std::vector<Game*>& data) {
 void dataAnalysis(std::vector<Game*>& data) {
     std::cout << "data size: " << data.size() << '\n';
     using std::chrono::duration_cast;
-    using ms = std::chrono::milliseconds;
+    using millis = std::chrono::milliseconds;
     using clock = std::chrono::steady_clock;
 
     std::random_device rd;
@@ -230,13 +231,26 @@ void dataAnalysis(std::vector<Game*>& data) {
     puts("Sorting by title then score then platform:");
     puts("================================");
 
-    puts("Tim sorting...");
+    puts("Merge sorting...");
     auto start = clock::now();
+    ms::mergeSort(data, Game::compareScores);
+    ms::mergeSort(data, Game::comparePlatform);
+    ms::mergeSort(data, Game::compareTitles);
+    auto elapsedTime = duration_cast<millis>(clock::now() - start);
+    print_stats(data);
+    printf("Merge sort took %lld millisconds.\n", elapsedTime.count());
+
+    puts("Shuffling");
+    generator();
+    std::ranges::shuffle(data.begin(), data.end(), generator);
+
+    puts("Tim sorting...");
+    start = clock::now();
     ts::timsort(data, Game::compareScores);
     ts::timsort(data, Game::comparePlatform);
     ts::timsort(data, Game::compareTitles);
 
-    auto elapsedTime = duration_cast<ms>(clock::now() - start);
+    elapsedTime = duration_cast<millis>(clock::now() - start);
 
     print_stats(data);
     std::cout << "Tim sort took " << elapsedTime.count() << " milliseconds.\n";
@@ -251,7 +265,7 @@ void dataAnalysis(std::vector<Game*>& data) {
     std::ranges::stable_sort(data.begin(), data.end(), Game::compareScores);
     std::ranges::stable_sort(data.begin(), data.end(), Game::comparePlatform);
     std::ranges::stable_sort(data.begin(), data.end(), Game::compareTitles);
-    elapsedTime = duration_cast<ms>(clock::now() - start);
+    elapsedTime = duration_cast<millis>(clock::now() - start);
 
     print_stats(data);
     std::cout << "Stablesort took " << elapsedTime.count() << "milliseconds.\n";
@@ -266,7 +280,7 @@ void dataAnalysis(std::vector<Game*>& data) {
     ts::binaryInsertionSort(data, Game::compareScores);
     ts::binaryInsertionSort(data, Game::comparePlatform);
     ts::binaryInsertionSort(data, Game::compareTitles);
-    elapsedTime = duration_cast<ms>(clock::now() - start);
+    elapsedTime = duration_cast<millis>(clock::now() - start);
     print_stats(data);
     std::cout << "Insertion sort took " << elapsedTime.count() << " milliseconds.\n";
 }

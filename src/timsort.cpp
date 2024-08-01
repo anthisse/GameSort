@@ -53,10 +53,10 @@ namespace ts {
 
     // Technically an introspective merge/insertion sort, but it's essentially a simplified timsort (no gallop)
     void timsort(std::vector<Game*>& games, bool (*comparator)(const Game* lhs, const Game* rhs)) {
-        // Minimum size of a run
+        // Minimum size of a run. 256 is an arbitrary value, but it seems to work well
         // Cast to ssize_t when using iterators to avoid narrowing conversion warnings when adding offsets
         // This is fine, since ssize_t is equal in size to long long int, which has an upper limit of 2^64 - 1
-        constexpr ssize_t RUN_SIZE = 64;
+        constexpr ssize_t RUN_SIZE = 256;
 
         const ssize_t gameSize = static_cast<ssize_t>(games.size()); // NOLINT(*-use-auto)
         // Sort individual vector slices
