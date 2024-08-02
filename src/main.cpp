@@ -115,18 +115,7 @@ void renderMainWindow(const sf::Font& font) {
     }
 }
 
-int main(int argc, char** argv) {
-    printf("program path: %s\n", argv[0]);
-    const char* env_MobyKey = std::getenv("MOBY_KEY");
-    if (!env_MobyKey) {
-        throw apiException();
-    }
-
-    sf::Font font;
-    if (!font.loadFromFile("../res/font.ttf")) {
-        throw (std::runtime_error("unable to load font, aborting!"));
-    }
-
+std::vector<Game*> loadGames(const sf::Font& font) {
     sf::RenderWindow loadingWindow(sf::VideoMode(900, 450), "GameSort", sf::Style::Close);
     loadingWindow.setMouseCursorVisible(true);
     sf::Text text;
@@ -143,8 +132,24 @@ int main(int argc, char** argv) {
     loadingWindow.clear(sf::Color(0, 33, 165));
     loadingWindow.draw(text);
     loadingWindow.display();
-    parseJsons();
+    std::vector<Game*> games = parseJsons();
     loadingWindow.close();
+    return games;
+}
+
+int main(int argc, char** argv) {
+    printf("program path: %s\n", argv[0]);
+    const char* env_MobyKey = std::getenv("MOBY_KEY");
+    if (!env_MobyKey) {
+        throw apiException();
+    }
+
+    sf::Font font;
+    if (!font.loadFromFile("../res/font.ttf")) {
+        throw (std::runtime_error("unable to load font, aborting!"));
+    }
+
+    std::vector<Game*> games = loadGames(font);
 
     renderMainWindow(font);
     return 0;
