@@ -61,7 +61,7 @@ std::array<sf::Text, 3> getThreeGenresText(const sf::Font& font, const std::vect
         displayedGenres[i].setCharacterSize(25);
         displayedGenres[i].setFillColor(sf::Color::White);
         // Casting is fine, i is always less than 3
-        displayedGenres[i].setPosition(650.0F, 145.0F + 175.0F * static_cast<float>(i));
+        displayedGenres[i].setPosition(950.0F, 145.0F + 175.0F * static_cast<float>(i));
     }
     return displayedGenres;
 }
@@ -78,7 +78,7 @@ std::array<sf::Text, 3> getThreePlatsText(const sf::Font& font, const std::vecto
         displayedPlatforms[i].setCharacterSize(25);
         displayedPlatforms[i].setFillColor(sf::Color::White);
         // Casting is fine, i is always less than 3
-        displayedPlatforms[i].setPosition(400.0F, 145.0F + 175.0F * static_cast<float>(i));
+        displayedPlatforms[i].setPosition(650.0F, 145.0F + 175.0F * static_cast<float>(i));
     }
     return displayedPlatforms;
 }
@@ -94,7 +94,7 @@ void renderMainWindow(const sf::Font& font, std::vector<Game*>& games) {
 
     // Start up the main window
     sf::Color gatorOrange(250, 70, 22);
-    sf::RenderWindow mainWindow(sf::VideoMode(1300, 700), "GameSort", sf::Style::Close);
+    sf::RenderWindow mainWindow(sf::VideoMode(1600, 700), "GameSort", sf::Style::Close);
     mainWindow.setMouseCursorVisible(true);
     mainWindow.setKeyRepeatEnabled(true);
 
@@ -102,16 +102,16 @@ void renderMainWindow(const sf::Font& font, std::vector<Game*>& games) {
     Text welcomeText("Game Sort", font, 35, sf::Text::Underlined, sf::Text::Bold, sf::Color::White,
                      sf::Vector2f(250 / 2.0f, (380 / 2.0f) - 150));
     Text sortGamesText("Order by:", font, 28, sf::Text::Underlined, sf::Text::Bold, sf::Color::White,
-                       sf::Vector2f(1100, (420 / 2.0f) - 150));
+                       sf::Vector2f(1400, (420 / 2.0f) - 150));
 
     // Point the singleton texture manager to the resource directory to get the textures and set the sprites
     TextureManager* textureManager = TextureManager::getInstance("../res");
-    sf::Sprite nextArrow = getSprite(textureManager->getTexture("arrowNext"), 1155, 650, 0.25, 0.25);
-    sf::Sprite prevArrow = getSprite(textureManager->getTexture("arrowPrevious"), 1055, 650, 0.25, 0.25);
-    sf::Sprite title = getSprite(textureManager->getTexture("titleButton"), 1100, 145, 0.13, 0.13);
-    sf::Sprite rating = getSprite(textureManager->getTexture("ratingButton"), 1100, 245, 0.13, 0.13);
-    sf::Sprite genre = getSprite(textureManager->getTexture("genreButton"), 1100, 345, 0.13, 0.13);
-    sf::Sprite platform = getSprite(textureManager->getTexture("platformButton"), 1100, 445, 0.13, 0.13);
+    sf::Sprite nextArrow = getSprite(textureManager->getTexture("arrowNext"), 1455, 650, 0.25, 0.25);
+    sf::Sprite prevArrow = getSprite(textureManager->getTexture("arrowPrevious"), 1355, 650, 0.25, 0.25);
+    sf::Sprite title = getSprite(textureManager->getTexture("titleButton"), 1400, 145, 0.13, 0.13);
+    sf::Sprite rating = getSprite(textureManager->getTexture("ratingButton"), 1400, 245, 0.13, 0.13);
+    sf::Sprite genre = getSprite(textureManager->getTexture("genreButton"), 1400, 345, 0.13, 0.13);
+    sf::Sprite platform = getSprite(textureManager->getTexture("platformButton"), 1400, 445, 0.13, 0.13);
 
     // Event-based loop
     while (mainWindow.isOpen()) {
