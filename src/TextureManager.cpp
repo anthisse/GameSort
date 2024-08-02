@@ -33,14 +33,24 @@ void TextureManager::loadTextures(const std::string& texturePath) {
     }
 }
 
-sf::Texture TextureManager::operator[](const std::string& textureName) {
+sf::Texture& TextureManager::operator[](const std::string& textureName) {
     return getTexture(textureName);
 }
 
+sf::Texture& TextureManager::operator[](const char textureName[]) {
+    return getTexture(textureName);
+}
 
-sf::Texture TextureManager::getTexture(const std::string& textureName) {
-    // TODO might need to be a pointer
+sf::Texture& TextureManager::getTexture(const std::string& textureName) {
     return textures.at(textureName);
+}
+
+std::unordered_map<std::string, sf::Texture>::const_iterator TextureManager::cbegin() {
+    return textures.cbegin();
+}
+
+std::unordered_map<std::string, sf::Texture>::const_iterator TextureManager::cend() {
+    return textures.cend();
 }
 
 TextureManager::~TextureManager() {

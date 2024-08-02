@@ -16,9 +16,15 @@ public:
 
     static TextureManager* getInstance(const std::string& directoryPath);
 
-    sf::Texture operator[](const std::string& textureName);
+    sf::Texture& operator[](const std::string& textureName);
 
-    sf::Texture getTexture(const std::string& textureName);
+    sf::Texture& operator[](const char textureName[]);
+
+    sf::Texture& getTexture(const std::string& textureName);
+
+    std::unordered_map<std::string, sf::Texture>::const_iterator cbegin();
+
+    std::unordered_map<std::string, sf::Texture>::const_iterator cend();
 
     ~TextureManager();
 
