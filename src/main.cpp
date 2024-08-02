@@ -41,10 +41,10 @@ int main(int argc, char** argv) {
     }
 
     puts("parsing jsons");
-    std::vector<Game*> data = parseJsons();
-    dataAnalysis(data);
+    // std::vector<Game*> data = parseJsons();
+    // dataAnalysis(data);
     // free memory
-    data.clear();
+    // data.clear();
 
     // SFML
     sf::RenderWindow welcomeWindow(sf::VideoMode(1300, 700), "GameSort", sf::Style::Close);
@@ -56,6 +56,7 @@ int main(int argc, char** argv) {
         std::cout << "can't load font :(" << std::endl;
     }
 
+    auto textureManager = TextureManager::getInstance("../res");
     Text welcomeText("Game Sort", font, 35, sf::Text::Underlined, sf::Text::Bold, sf::Color::Blue,
                      sf::Vector2f(250 / 2.0f, (380 / 2.0f) - 150));
     Text sortGamesText("Order by:", font, 28, sf::Text::Underlined, sf::Text::Bold, sf::Color::Blue,
@@ -69,10 +70,8 @@ int main(int argc, char** argv) {
     Text sortByPlatformText("Platform", font, 20, sf::Text::Bold, sf::Text::Bold, sf::Color::Blue,
                             sf::Vector2f(1100, (1180 / 2.0f) - 150));
 
-    //Buttons arrowNextButton("arrowNext", (25 * 45) - 180, 20 * (16 + 0.5f));
-    //Buttons arrowPreviousButton("arrowPrevious", ((25 / 2.0f) * 5) - 32, 20 * (16 + 0.5f));
-
-    sf::Texture& nextArrowTexture = TextureManager::getTexture("arrowNext");
+    // TODO All these sf::Textures might need to change to sf::Texture* or sf::Texture&
+    sf::Texture nextArrowTexture = textureManager->getTexture("arrowNext");
     sf::Sprite nextArrowSprite;
     nextArrowSprite.setTexture(nextArrowTexture);
     nextArrowSprite.setScale(0.25, 0.25); // have to scale it down so it fits in the window bc big image
@@ -80,7 +79,7 @@ int main(int argc, char** argv) {
     // set it somewhere we want on screen
     nextArrowSprite.setPosition(1250, 650);
 
-    sf::Texture& previousArrowTexture = TextureManager::getTexture("arrowPrevious");
+    sf::Texture previousArrowTexture = textureManager->getTexture("arrowPrevious");
     sf::Sprite previousArrowSprite;
     previousArrowSprite.setTexture(previousArrowTexture);
     previousArrowSprite.setScale(0.25, 0.25); // have to scale it down so it fits in the window bc big image
@@ -88,7 +87,7 @@ int main(int argc, char** argv) {
     // set it somewhere we want on screen
     previousArrowSprite.setPosition(1150, 650);
 
-    sf::Texture& toggleOnTitleTexture = TextureManager::getTexture("toggleOn");
+    sf::Texture toggleOnTitleTexture = textureManager->getTexture("toggleOn");
     sf::Sprite toggleOnTitleSprite;
     toggleOnTitleSprite.setTexture(toggleOnTitleTexture);
     toggleOnTitleSprite.setScale(0.13, 0.13); // have to scale it down so it fits in the window bc big image
@@ -96,7 +95,7 @@ int main(int argc, char** argv) {
     // set it somewhere we want on screen
     toggleOnTitleSprite.setPosition(1225, 145);
 
-    sf::Texture& toggleOnRatingTexture = TextureManager::getTexture("toggleOn");
+    sf::Texture toggleOnRatingTexture = textureManager->getTexture("toggleOn");
     sf::Sprite toggleOnRatingSprite;
     toggleOnRatingSprite.setTexture(toggleOnRatingTexture);
     toggleOnRatingSprite.setScale(0.13, 0.13); // have to scale it down so it fits in the window bc big image
@@ -104,7 +103,7 @@ int main(int argc, char** argv) {
     // set it somewhere we want on screen
     toggleOnRatingSprite.setPosition(1225, 245);
 
-    sf::Texture& toggleOnGenreTexture = TextureManager::getTexture("toggleOn");
+    sf::Texture toggleOnGenreTexture = textureManager->getTexture("toggleOn");
     sf::Sprite toggleOnGenreSprite;
     toggleOnGenreSprite.setTexture(toggleOnGenreTexture);
     toggleOnGenreSprite.setScale(0.13, 0.13); // have to scale it down so it fits in the window bc big image
@@ -112,7 +111,7 @@ int main(int argc, char** argv) {
     // set it somewhere we want on screen
     toggleOnGenreSprite.setPosition(1225, 345);
 
-    sf::Texture& toggleOnPlatformTexture = TextureManager::getTexture("toggleOn");
+    sf::Texture toggleOnPlatformTexture = textureManager->getTexture("toggleOn");
     sf::Sprite toggleOnPlatformSprite;
     toggleOnPlatformSprite.setTexture(toggleOnPlatformTexture);
     toggleOnPlatformSprite.setScale(0.13, 0.13); // have to scale it down so it fits in the window bc big image
@@ -120,7 +119,7 @@ int main(int argc, char** argv) {
                                      toggleOnPlatformTexture.getSize().y / 2.0f); // set it somewhere we want on screen
     toggleOnPlatformSprite.setPosition(1225, 445);
 
-    sf::Texture& toggleOffTitleTexture = TextureManager::getTexture("toggleOff");
+    sf::Texture toggleOffTitleTexture = textureManager->getTexture("toggleOff");
     sf::Sprite toggleOffTitleSprite;
     toggleOffTitleSprite.setTexture(toggleOffTitleTexture);
     toggleOffTitleSprite.setScale(0.13, 0.13); // have to scale it down so it fits in the window bc big image
@@ -128,7 +127,7 @@ int main(int argc, char** argv) {
     // set it somewhere we want on screen
     toggleOffTitleSprite.setPosition(1225, 145);
 
-    sf::Texture& toggleOffRatingTexture = TextureManager::getTexture("toggleOff");
+    sf::Texture toggleOffRatingTexture = textureManager->getTexture("toggleOff");
     sf::Sprite toggleOffRatingSprite;
     toggleOffRatingSprite.setTexture(toggleOffRatingTexture);
     toggleOffRatingSprite.setScale(0.13, 0.13); // have to scale it down so it fits in the window bc big image
@@ -136,7 +135,7 @@ int main(int argc, char** argv) {
                                     toggleOffRatingTexture.getSize().y / 2.0f); // set it somewhere we want on screen
     toggleOffRatingSprite.setPosition(1225, 245);
 
-    sf::Texture& toggleOffGenreTexture = TextureManager::getTexture("toggleOff");
+    sf::Texture toggleOffGenreTexture = textureManager->getTexture("toggleOff");
     sf::Sprite toggleOffGenreSprite;
     toggleOffGenreSprite.setTexture(toggleOffGenreTexture);
     toggleOffGenreSprite.setScale(0.13, 0.13); // have to scale it down so it fits in the window bc big image
@@ -144,7 +143,7 @@ int main(int argc, char** argv) {
     // set it somewhere we want on screen
     toggleOffGenreSprite.setPosition(1225, 345);
 
-    sf::Texture& toggleOffPlatformTexture = TextureManager::getTexture("toggleOff");
+    sf::Texture toggleOffPlatformTexture = textureManager->getTexture("toggleOff");
     sf::Sprite toggleOffPlatformSprite;
     toggleOffPlatformSprite.setTexture(toggleOffPlatformTexture);
     toggleOffPlatformSprite.setScale(0.13, 0.13); // have to scale it down so it fits in the window bc big image

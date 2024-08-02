@@ -1,10 +1,33 @@
 #pragma once
+#include <string>
 #include <unordered_map>
 #include <SFML/Graphics.hpp>
 
 class TextureManager {
-    static std::unordered_map<std::string, sf::Texture> textures;
-
 public:
-    static sf::Texture& getTexture(std::string textureName);
+    // Singleton, delete copy constructor and copy assignment operator
+    TextureManager(TextureManager& rhs) = delete;
+
+    TextureManager(TextureManager&& rhs) = delete;
+
+    void operator=(const TextureManager& rhs) = delete;
+
+    void operator=(const TextureManager&& rhs) = delete;
+
+    static TextureManager* getInstance(const std::string& directoryPath);
+
+    sf::Texture operator[](const std::string& textureName);
+
+    sf::Texture getTexture(const std::string& textureName);
+
+    ~TextureManager();
+
+private:
+    explicit TextureManager(const std::string& directoryPath);
+
+    static TextureManager* instance;
+
+    void loadTextures(const std::string& texturePath);
+
+    std::unordered_map<std::string, sf::Texture> textures;
 };

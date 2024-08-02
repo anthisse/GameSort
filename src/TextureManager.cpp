@@ -1,20 +1,49 @@
-#include <unordered_map>
-#include <SFML/Graphics.hpp>
 #include "TextureManager.h"
-// code referenced by Elliot's minesweeper project
+#include <iostream> // TODO remove me
+#include <filesystem>
 
-std::unordered_map<std::string, sf::Texture> TextureManager::textures;
+TextureManager* TextureManager::instance = nullptr;
 
-sf::Texture& TextureManager::getTexture(std::string textureName) {
-    auto result = textures.find(textureName);
-    if(result == textures.end()) {                                          // Texture does not already exist in the map, go get it
-        sf::Texture newTexture;
-        newTexture.loadFromFile("../res/images/" + textureName + ".png");
-        textures[textureName] = newTexture;
-        return textures[textureName];
+TextureManager* TextureManager::getInstance(const std::string& directoryPath) {
+    if (!instance) {
+        instance = new TextureManager(directoryPath);
     }
-    else {
-        return result->second;                   // Texture already exists, return it
-    }
-
+    return instance;
 }
+
+TextureManager::TextureManager(const std::string& directoryPath) {
+    loadTextures(directoryPath);
+}
+
+void TextureManager::loadTextures(const std::string& texturePath) {
+    const std::filesystem::recursive_directory_iterator iter(texturePath);
+    for (const auto& file : iter) {
+        if (file.is_regular_file() && (file.path().extension() == ".png" || file.path().extension() == ".jpg")) {
+            std::cout << "Found image/texture " << file.path().filename() << "\n";
+            sf::Texture texture;
+            if (!texture.loadFromFile(file.path().string())) {
+                std::cerr << "Loading image" << file.path() << " failed\n";
+                continue;
+            }
+            textures.emplace(file.path().filename().replace_extension().string(), texture);
+        }
+    }
+    if (textures.empty()) {
+        throw std::runtime_error("Textures missing, aborting!");
+    }
+}
+
+sf::Texture TextureManager::operator[](const std::string& textureName) {
+    return getTexture(textureName);
+}
+
+
+sf::Texture TextureManager::getTexture(const std::string& textureName) {
+    // TODO might need to be a pointer
+    return textures.at(textureName);
+}
+
+TextureManager::~TextureManager() {
+    textures.clear();
+}
+
