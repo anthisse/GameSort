@@ -44,11 +44,10 @@ sf::Sprite getSprite(sf::Texture& texture, float xPos, float yPos, float xScale,
     return sprite;
 }
 
-std::array<sf::Text, 3> getDisplayedGenresText(const sf::Font& font, const std::vector<Game*>& data,
-                                               const size_t gameIndex) {
+std::array<sf::Text, 3> getThreeGenresText(const sf::Font& font, const std::vector<Game*>& games, const size_t indx) {
     std::array<sf::Text, 3> displayedGenres;
     for (size_t i = 0; i < displayedGenres.size(); ++i) {
-        auto genres = data[gameIndex + i]->get_genres();
+        auto genres = games[indx + i]->get_genres();
         std::string genreString;
         for (size_t genreIndex = 0; (genreIndex < genres.size() && genreIndex <= 4); ++genreIndex) {
             if (genres[genreIndex].length() <= 20) {
@@ -62,19 +61,44 @@ std::array<sf::Text, 3> getDisplayedGenresText(const sf::Font& font, const std::
         displayedGenres[i].setCharacterSize(25);
         displayedGenres[i].setFillColor(sf::Color::White);
         // Casting is fine, i is always less than 3
-        displayedGenres[i].setPosition(600.0F, 145.0F + 175.0F * static_cast<float>(i));
+        displayedGenres[i].setPosition(650.0F, 145.0F + 175.0F * static_cast<float>(i));
     }
     return displayedGenres;
 }
 
+std::array<sf::Text, 3> getThreePlatsText(const sf::Font& font, const std::vector<Game*>& games, const size_t indx) {
+    std::array<sf::Text, 3> displayedPlatforms;
+    for (size_t i = 0; i < displayedPlatforms.size(); ++i) {
+        if (std::string platformString = games[indx + i]->get_platform(); platformString.size() <= 20) {
+            displayedPlatforms[i].setString(platformString);
+        } else {
+            displayedPlatforms[i].setString(platformString.substr(0, 17) + "...");
+        }
+        displayedPlatforms[i].setFont(font);
+        displayedPlatforms[i].setCharacterSize(25);
+        displayedPlatforms[i].setFillColor(sf::Color::White);
+        // Casting is fine, i is always less than 3
+        displayedPlatforms[i].setPosition(400.0F, 145.0F + 175.0F * static_cast<float>(i));
+    }
+    return displayedPlatforms;
+}
+
 void renderMainWindow(const sf::Font& font, std::vector<Game*>& games) {
+    // Shuffle the data to start to ensure a good spread
+    std::random_device rd;
+    std::mt19937 generator(rd());
+    std::ranges::shuffle(games.begin(), games.end(), generator);
+
+    // Index of games vector that is currently being displayed
     size_t gameIndex = 0;
+
+    // Start up the main window
     sf::Color gatorOrange(250, 70, 22);
-    sf::Color gatorBlue(0, 33, 165);
     sf::RenderWindow mainWindow(sf::VideoMode(1300, 700), "GameSort", sf::Style::Close);
     mainWindow.setMouseCursorVisible(true);
     mainWindow.setKeyRepeatEnabled(true);
 
+    // Get headers
     Text welcomeText("Game Sort", font, 35, sf::Text::Underlined, sf::Text::Bold, sf::Color::White,
                      sf::Vector2f(250 / 2.0f, (380 / 2.0f) - 150));
     Text sortGamesText("Order by:", font, 28, sf::Text::Underlined, sf::Text::Bold, sf::Color::White,
@@ -92,7 +116,9 @@ void renderMainWindow(const sf::Font& font, std::vector<Game*>& games) {
     // Event-based loop
     while (mainWindow.isOpen()) {
         sf::Event event{};
-        std::array<sf::Text, 3> displayedGenres = getDisplayedGenresText(font, games, gameIndex);
+        std::array<sf::Text, 3> displayedGenres = getThreeGenresText(font, games, gameIndex);
+        std::array<sf::Text, 3> displayedPlatforms =  getThreePlatsText(font, games, gameIndex);
+
         while (mainWindow.pollEvent(event)) {
             if (event.type == sf::Event::Closed) {
                 // Click X on the window
@@ -138,6 +164,9 @@ void renderMainWindow(const sf::Font& font, std::vector<Game*>& games) {
         mainWindow.draw(welcomeText.getText());
         mainWindow.draw(sortGamesText.getText());
         for (const auto& text : displayedGenres) {
+            mainWindow.draw(text);
+        }
+        for (const auto& text : displayedPlatforms) {
             mainWindow.draw(text);
         }
         mainWindow.display();
