@@ -44,7 +44,8 @@ sf::Sprite getSprite(sf::Texture& texture, float xPos, float yPos, float xScale,
     return sprite;
 }
 
-std::array<sf::Text, 3> getDisplayedGenresText(const sf::Font& font, const std::vector<Game*>& data, const size_t gameIndex) {
+std::array<sf::Text, 3> getDisplayedGenresText(const sf::Font& font, const std::vector<Game*>& data,
+                                               const size_t gameIndex) {
     std::array<sf::Text, 3> displayedGenres;
     for (size_t i = 0; i < displayedGenres.size(); ++i) {
         auto genres = data[gameIndex + i]->get_genres();
@@ -66,7 +67,7 @@ std::array<sf::Text, 3> getDisplayedGenresText(const sf::Font& font, const std::
     return displayedGenres;
 }
 
-void renderMainWindow(const sf::Font& font, std::vector<Game*>& data) {
+void renderMainWindow(const sf::Font& font, std::vector<Game*>& games) {
     size_t gameIndex = 0;
     sf::Color gatorOrange(250, 70, 22);
     sf::Color gatorBlue(0, 33, 165);
@@ -78,8 +79,6 @@ void renderMainWindow(const sf::Font& font, std::vector<Game*>& data) {
                      sf::Vector2f(250 / 2.0f, (380 / 2.0f) - 150));
     Text sortGamesText("Order by:", font, 28, sf::Text::Underlined, sf::Text::Bold, sf::Color::White,
                        sf::Vector2f(1100, (420 / 2.0f) - 150));
-
-    std::array<sf::Text, 3> displayedGenres = getDisplayedGenresText(font, data, gameIndex);
 
     // Point the singleton texture manager to the resource directory to get the textures and set the sprites
     TextureManager* textureManager = TextureManager::getInstance("../res");
@@ -93,10 +92,11 @@ void renderMainWindow(const sf::Font& font, std::vector<Game*>& data) {
     // Event-based loop
     while (mainWindow.isOpen()) {
         sf::Event event{};
+        std::array<sf::Text, 3> displayedGenres = getDisplayedGenresText(font, games, gameIndex);
         while (mainWindow.pollEvent(event)) {
             if (event.type == sf::Event::Closed) {
                 // Click X on the window
-                data.clear();
+                games.clear();
                 mainWindow.close();
                 std::exit(0);
             }
@@ -104,12 +104,15 @@ void renderMainWindow(const sf::Font& font, std::vector<Game*>& data) {
             if (event.type == sf::Event::MouseButtonPressed) {
                 sf::Vector2i mouse = sf::Mouse::getPosition(mainWindow);
                 if (nextArrow.getGlobalBounds().contains(mainWindow.mapPixelToCoords(mouse))) {
-                    // TODO go to next page
                     puts("next arr press, goto next page");
+                    if (gameIndex + 2 < games.size()) {
+                        gameIndex += 2;
+                    }
                 }
                 if (prevArrow.getGlobalBounds().contains(mainWindow.mapPixelToCoords(mouse))) {
-                    // todo go to prev page
-                    puts("prev arr press, goto prev page");
+                    if (gameIndex - 2 > 0) {
+                        gameIndex -= 2;
+                    }
                 }
                 if (title.getGlobalBounds().contains(mainWindow.mapPixelToCoords(mouse))) {
                     puts("title pressed, sort by title");
@@ -124,7 +127,6 @@ void renderMainWindow(const sf::Font& font, std::vector<Game*>& data) {
                     puts("platform pressed, sort by platform");
                 }
             }
-
         }
         mainWindow.clear(gatorOrange);
         mainWindow.draw(title);
