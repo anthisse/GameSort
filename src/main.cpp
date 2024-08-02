@@ -280,7 +280,7 @@ std::vector<Game*> parseJsons() {
             }
         }
     }
-    //std::cout << "Finished parsing in " << duration_cast<ms>(clock::now() - start) << '\n';
+    std::cout << "Finished parsing in " << duration_cast<ms>(clock::now() - start) << '\n';
     return games;
 }
 
