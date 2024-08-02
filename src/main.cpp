@@ -45,13 +45,17 @@ sf::Sprite getSprite(sf::Texture& texture, float xPos, float yPos, float xScale,
 }
 
 std::array<sf::Text, 3> getThreeTitlesText(const sf::Font& font, const std::vector<Game*>& games, const size_t index) {
+    constexpr size_t MAX_TITLE_LENGTH = 100;
     std::array<sf::Text, 3> displayedTitles;
     for (size_t i = 0; i < displayedTitles.size(); ++i) {
-        if (std::string title = games[index + i]->get_title(); title.size() <= 20) {
-            displayedTitles[i].setString(title);
-        } else {
-            displayedTitles[i].setString(title.substr(0, 17) + "...");
+        std::string title = games[index + i]->get_title();
+        if (title.size() >= MAX_TITLE_LENGTH) {
+            title = title.substr(0, 97) + "...";
         }
+        for (size_t stringIndex = 19; stringIndex < title.size(); stringIndex += 20) {
+            title.insert(stringIndex, "-\n");
+        }
+        displayedTitles[i].setString(title);
         displayedTitles[i].setFont(font);
         displayedTitles[i].setCharacterSize(25);
         displayedTitles[i].setFillColor(sf::Color::White);
