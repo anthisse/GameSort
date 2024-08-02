@@ -124,7 +124,9 @@ void renderMainWindow(const sf::Font& font, std::vector<Game*>& games) {
     std::ranges::shuffle(games.begin(), games.end(), generator);
 
     // Index of games vector that is currently being displayed
-    size_t gameIndex = 0;
+    // ssize_t is okay, we only have 500,000ish games which can comfortably fit in just a long
+    std::cout << "ssize t size: " << sizeof(ssize_t) << '\n';
+    ssize_t gameIndex = 0;
 
     // Start up the main window
     sf::Color gatorOrange(250, 70, 22);
@@ -151,7 +153,7 @@ void renderMainWindow(const sf::Font& font, std::vector<Game*>& games) {
     while (mainWindow.isOpen()) {
         sf::Event event{};
         std::array<sf::Text, 3> displayedGenres = getThreeGenresText(font, games, gameIndex);
-        std::array<sf::Text, 3> displayedPlatforms =  getThreePlatsText(font, games, gameIndex);
+        std::array<sf::Text, 3> displayedPlatforms = getThreePlatsText(font, games, gameIndex);
         std::array<sf::Text, 3> displayedRatings = getThreeRatingsText(font, games, gameIndex);
         std::array<sf::Text, 3> displayedTitles = getThreeTitlesText(font, games, gameIndex);
         while (mainWindow.pollEvent(event)) {
@@ -166,13 +168,14 @@ void renderMainWindow(const sf::Font& font, std::vector<Game*>& games) {
                 sf::Vector2i mouse = sf::Mouse::getPosition(mainWindow);
                 if (nextArrow.getGlobalBounds().contains(mainWindow.mapPixelToCoords(mouse))) {
                     puts("next arr press, goto next page");
-                    if (gameIndex + 2 < games.size()) {
-                        gameIndex += 2;
+                    if (gameIndex + 3 < static_cast<ssize_t>(games.size())) {
+                        gameIndex += 3;
                     }
                 }
                 if (prevArrow.getGlobalBounds().contains(mainWindow.mapPixelToCoords(mouse))) {
-                    if (gameIndex - 2 > 0) {
-                        gameIndex -= 2;
+                    printf("current game index: %llu\n", gameIndex);
+                    if (gameIndex - 3 >= 0) {
+                        gameIndex -= 3;
                     }
                 }
                 if (title.getGlobalBounds().contains(mainWindow.mapPixelToCoords(mouse))) {
