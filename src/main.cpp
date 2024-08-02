@@ -41,8 +41,10 @@ int main(int argc, char** argv) {
     }
 
     puts("parsing jsons");
-    //std::vector<Game*> data = parseJsons();
-    //dataAnalysis(data);
+    std::vector<Game*> data = parseJsons();
+    dataAnalysis(data);
+    // free memory
+    data.clear();
 
     // SFML
     sf::RenderWindow welcomeWindow(sf::VideoMode(1300, 700), "GameSort", sf::Style::Close);
@@ -280,7 +282,7 @@ std::vector<Game*> parseJsons() {
             }
         }
     }
-    std::cout << "Finished parsing in " << duration_cast<ms>(clock::now() - start) << '\n';
+    std::cout << "Finished parsing in " << duration_cast<ms>(clock::now() - start).count() << '\n';
     return games;
 }
 
