@@ -44,10 +44,27 @@ sf::Sprite getSprite(sf::Texture& texture, float xPos, float yPos, float xScale,
     return sprite;
 }
 
-std::array<sf::Text, 3> getThreeGenresText(const sf::Font& font, const std::vector<Game*>& games, const size_t indx) {
+std::array<sf::Text, 3> getThreeTitlesText(const sf::Font& font, const std::vector<Game*>& games, const size_t index) {
+    std::array<sf::Text, 3> displayedTitles;
+    for (size_t i = 0; i < displayedTitles.size(); ++i) {
+        if (std::string title = games[index + i]->get_title(); title.size() <= 20) {
+            displayedTitles[i].setString(title);
+        } else {
+            displayedTitles[i].setString(title.substr(0, 17) + "...");
+        }
+        displayedTitles[i].setFont(font);
+        displayedTitles[i].setCharacterSize(25);
+        displayedTitles[i].setFillColor(sf::Color::White);
+        // Casting is fine, i is always less than 3
+        displayedTitles[i].setPosition(100.0F, 145.0F + 175.0F * static_cast<float>(i));
+    }
+    return displayedTitles;
+}
+
+std::array<sf::Text, 3> getThreeGenresText(const sf::Font& font, const std::vector<Game*>& games, const size_t index) {
     std::array<sf::Text, 3> displayedGenres;
     for (size_t i = 0; i < displayedGenres.size(); ++i) {
-        auto genres = games[indx + i]->get_genres();
+        auto genres = games[index + i]->get_genres();
         std::string genreString;
         for (size_t genreIndex = 0; (genreIndex < genres.size() && genreIndex <= 4); ++genreIndex) {
             if (genres[genreIndex].length() <= 20) {
@@ -66,10 +83,10 @@ std::array<sf::Text, 3> getThreeGenresText(const sf::Font& font, const std::vect
     return displayedGenres;
 }
 
-std::array<sf::Text, 3> getThreePlatsText(const sf::Font& font, const std::vector<Game*>& games, const size_t indx) {
+std::array<sf::Text, 3> getThreePlatsText(const sf::Font& font, const std::vector<Game*>& games, const size_t index) {
     std::array<sf::Text, 3> displayedPlatforms;
     for (size_t i = 0; i < displayedPlatforms.size(); ++i) {
-        if (std::string platformString = games[indx + i]->get_platform(); platformString.size() <= 20) {
+        if (std::string platformString = games[index + i]->get_platform(); platformString.size() <= 20) {
             displayedPlatforms[i].setString(platformString);
         } else {
             displayedPlatforms[i].setString(platformString.substr(0, 17) + "...");
@@ -81,6 +98,19 @@ std::array<sf::Text, 3> getThreePlatsText(const sf::Font& font, const std::vecto
         displayedPlatforms[i].setPosition(650.0F, 145.0F + 175.0F * static_cast<float>(i));
     }
     return displayedPlatforms;
+}
+
+std::array<sf::Text, 3> getThreeRatingsText(const sf::Font& font, const std::vector<Game*>& games, const size_t indx) {
+    std::array<sf::Text, 3> displayedRatings;
+    for (size_t i = 0; i < displayedRatings.size(); ++i) {
+        displayedRatings[i].setString(std::format("{:.2f}", games[indx + i]->get_score()) + " / 10");
+        displayedRatings[i].setFont(font);
+        displayedRatings[i].setCharacterSize(25);
+        displayedRatings[i].setFillColor(sf::Color::White);
+        // Casting is fine, i is always less than 3
+        displayedRatings[i].setPosition(475.0F, 145.0F + 175.0F * static_cast<float>(i));
+    }
+    return displayedRatings;
 }
 
 void renderMainWindow(const sf::Font& font, std::vector<Game*>& games) {
@@ -118,7 +148,8 @@ void renderMainWindow(const sf::Font& font, std::vector<Game*>& games) {
         sf::Event event{};
         std::array<sf::Text, 3> displayedGenres = getThreeGenresText(font, games, gameIndex);
         std::array<sf::Text, 3> displayedPlatforms =  getThreePlatsText(font, games, gameIndex);
-
+        std::array<sf::Text, 3> displayedRatings = getThreeRatingsText(font, games, gameIndex);
+        std::array<sf::Text, 3> displayedTitles = getThreeTitlesText(font, games, gameIndex);
         while (mainWindow.pollEvent(event)) {
             if (event.type == sf::Event::Closed) {
                 // Click X on the window
@@ -163,17 +194,26 @@ void renderMainWindow(const sf::Font& font, std::vector<Game*>& games) {
         mainWindow.draw(prevArrow);
         mainWindow.draw(welcomeText.getText());
         mainWindow.draw(sortGamesText.getText());
-        for (const auto& text : displayedGenres) {
-            mainWindow.draw(text);
+        for (const auto& genreText : displayedGenres) {
+            mainWindow.draw(genreText);
         }
-        for (const auto& text : displayedPlatforms) {
-            mainWindow.draw(text);
+        for (const auto& platformText : displayedPlatforms) {
+            mainWindow.draw(platformText);
         }
+        for (const auto& scoreText : displayedRatings) {
+            mainWindow.draw(scoreText);
+        }
+        for (const auto& titleText : displayedTitles) {
+            mainWindow.draw(titleText);
+        }
+
+
         mainWindow.display();
         // Lock framerate to 60 to avoid high CPU consumption
         sf::sleep(sf::seconds(1.0F / 60.0F));
     }
 }
+
 
 sf::Text getLoadingText(const sf::Font& font, const sf::RenderWindow& loadingWindow) {
     sf::Text text;
