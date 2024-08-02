@@ -25,22 +25,6 @@ std::string Game::get_platform() const {
     return this->platform_;
 }
 
-void Game::set_title(std::string title) {
-    this->title_ = std::move(title);
-}
-
-void Game::set_genres(std::vector<std::string> genres) {
-    this->genres_ = std::move(genres);
-}
-
-void Game::set_score(const double score) {
-    this->score_ = score;
-}
-
-void Game::set_platform(std::string platform) {
-    this->platform_ = std::move(platform);
-}
-
 // Enforce stability by comparing the platforms if the titles are the same
 // Technically, this won't work if both fields are the same, but our data shouldn't have duplicate games anyway
 bool Game::compareTitles(const Game* lhs, const Game* rhs) {
