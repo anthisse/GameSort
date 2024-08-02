@@ -44,38 +44,65 @@ sf::Sprite getSprite(sf::Texture& texture, float xPos, float yPos, float xScale,
     return sprite;
 }
 
-void renderMainWindow(const sf::Font& font) {
+std::array<sf::Text, 3> getDisplayedGenresText(const sf::Font& font, const std::vector<Game*>& data, const size_t gameIndex) {
+    std::array<sf::Text, 3> displayedGenres;
+    for (size_t i = 0; i < displayedGenres.size(); ++i) {
+        auto genres = data[gameIndex + i]->get_genres();
+        std::string genreString;
+        for (size_t genreIndex = 0; (genreIndex < genres.size() && genreIndex <= 4); ++genreIndex) {
+            if (genres[genreIndex].length() <= 20) {
+                genreString += genres[genreIndex] + '\n';
+                continue;
+            }
+            genreString += genres[genreIndex].substr(0, 17) + "...\n";
+        }
+        displayedGenres[i].setString(genreString);
+        displayedGenres[i].setFont(font);
+        displayedGenres[i].setCharacterSize(25);
+        displayedGenres[i].setFillColor(sf::Color::White);
+        // Casting is fine, i is always less than 3
+        displayedGenres[i].setPosition(600.0F, 145.0F + 175.0F * static_cast<float>(i));
+    }
+    return displayedGenres;
+}
+
+void renderMainWindow(const sf::Font& font, std::vector<Game*>& data) {
+    size_t gameIndex = 0;
     sf::Color gatorOrange(250, 70, 22);
-    // SFML
+    sf::Color gatorBlue(0, 33, 165);
     sf::RenderWindow mainWindow(sf::VideoMode(1300, 700), "GameSort", sf::Style::Close);
     mainWindow.setMouseCursorVisible(true);
     mainWindow.setKeyRepeatEnabled(true);
-    TextureManager* textureManager = TextureManager::getInstance("../res");
+
     Text welcomeText("Game Sort", font, 35, sf::Text::Underlined, sf::Text::Bold, sf::Color::White,
                      sf::Vector2f(250 / 2.0f, (380 / 2.0f) - 150));
-    Text sortGamesText("Order by:", font, 28, sf::Text::Underlined, sf::Text::Bold, gatorOrange,
+    Text sortGamesText("Order by:", font, 28, sf::Text::Underlined, sf::Text::Bold, sf::Color::White,
                        sf::Vector2f(1100, (420 / 2.0f) - 150));
 
+    std::array<sf::Text, 3> displayedGenres = getDisplayedGenresText(font, data, gameIndex);
 
+    // Point the singleton texture manager to the resource directory to get the textures and set the sprites
+    TextureManager* textureManager = TextureManager::getInstance("../res");
     sf::Sprite nextArrow = getSprite(textureManager->getTexture("arrowNext"), 1155, 650, 0.25, 0.25);
     sf::Sprite prevArrow = getSprite(textureManager->getTexture("arrowPrevious"), 1055, 650, 0.25, 0.25);
     sf::Sprite title = getSprite(textureManager->getTexture("titleButton"), 1100, 145, 0.13, 0.13);
     sf::Sprite rating = getSprite(textureManager->getTexture("ratingButton"), 1100, 245, 0.13, 0.13);
     sf::Sprite genre = getSprite(textureManager->getTexture("genreButton"), 1100, 345, 0.13, 0.13);
     sf::Sprite platform = getSprite(textureManager->getTexture("platformButton"), 1100, 445, 0.13, 0.13);
-    // bool for these so we can toggle them later on in main for when button is pressed
+
+    // Event-based loop
     while (mainWindow.isOpen()) {
-        sf::Event Event{};
-        while (mainWindow.pollEvent(Event)) {
-            if (Event.type == sf::Event::Closed) {
+        sf::Event event{};
+        while (mainWindow.pollEvent(event)) {
+            if (event.type == sf::Event::Closed) {
                 // Click X on the window
-                // data.clear();
+                data.clear();
                 mainWindow.close();
                 std::exit(0);
             }
-            if (Event.type == sf::Event::MouseButtonPressed) {
-                sf::Vector2i mouse; // 2-dimensional vector of floating point coordinates x,y
-                mouse = sf::Mouse::getPosition(mainWindow);
+            // If left mouse button pressed, check what was clicked
+            if (event.type == sf::Event::MouseButtonPressed) {
+                sf::Vector2i mouse = sf::Mouse::getPosition(mainWindow);
                 if (nextArrow.getGlobalBounds().contains(mainWindow.mapPixelToCoords(mouse))) {
                     // TODO go to next page
                     puts("next arr press, goto next page");
@@ -98,26 +125,26 @@ void renderMainWindow(const sf::Font& font) {
                 }
             }
 
-
-            mainWindow.clear(sf::Color(250, 70, 22));
-            mainWindow.draw(title);
-            mainWindow.draw(rating);
-            mainWindow.draw(genre);
-            mainWindow.draw(platform);
-            mainWindow.draw(nextArrow);
-            mainWindow.draw(prevArrow);
-            mainWindow.draw(welcomeText.getText());
-            mainWindow.draw(sortGamesText.getText());
-            mainWindow.display();
         }
+        mainWindow.clear(gatorOrange);
+        mainWindow.draw(title);
+        mainWindow.draw(rating);
+        mainWindow.draw(genre);
+        mainWindow.draw(platform);
+        mainWindow.draw(nextArrow);
+        mainWindow.draw(prevArrow);
+        mainWindow.draw(welcomeText.getText());
+        mainWindow.draw(sortGamesText.getText());
+        for (const auto& text : displayedGenres) {
+            mainWindow.draw(text);
+        }
+        mainWindow.display();
         // Lock framerate to 60 to avoid high CPU consumption
         sf::sleep(sf::seconds(1.0F / 60.0F));
     }
 }
 
-std::vector<Game*> loadGames(const sf::Font& font) {
-    sf::RenderWindow loadingWindow(sf::VideoMode(900, 450), "GameSort", sf::Style::Close);
-    loadingWindow.setMouseCursorVisible(true);
+sf::Text getLoadingText(const sf::Font& font, const sf::RenderWindow& loadingWindow) {
     sf::Text text;
     text.setString("Parsing jsons...");
     text.setFont(font);
@@ -129,6 +156,13 @@ std::vector<Game*> loadGames(const sf::Font& font) {
     text.setOrigin(textRect.left + textRect.width / 2.0f, textRect.top + textRect.height / 2.0f);
     text.setPosition(static_cast<float>(loadingWindow.getSize().x) / 2.0f,
                      static_cast<float>(loadingWindow.getSize().y) / 2.0f);
+    return text;
+}
+
+std::vector<Game*> loadGames(const sf::Font& font) {
+    sf::RenderWindow loadingWindow(sf::VideoMode(900, 450), "GameSort", sf::Style::Close);
+    loadingWindow.setMouseCursorVisible(true);
+    sf::Text text = getLoadingText(font, loadingWindow);
     loadingWindow.clear(sf::Color(0, 33, 165));
     loadingWindow.draw(text);
     loadingWindow.display();
@@ -151,7 +185,7 @@ int main(int argc, char** argv) {
 
     std::vector<Game*> games = loadGames(font);
 
-    renderMainWindow(font);
+    renderMainWindow(font, games);
     return 0;
 }
 
@@ -162,7 +196,7 @@ std::vector<std::string> getBlacklist() {
     if (!file.is_open()) {
         std::string msg = "Failed to find blacklist file at ";
         msg.append(path);
-        throw (std::ifstream::failure(msg));
+        throw std::ifstream::failure(msg);
     }
     std::vector<std::string> blacklist;
     std::string word;
