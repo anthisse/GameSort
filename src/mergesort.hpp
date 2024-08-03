@@ -40,7 +40,7 @@ namespace ms {
      *     n = leftSlice's size and m = rightSlice's size
      * Stable algorithm
      */
-    void merge_(std::vector<Game*>& games, int left, int mid, int right,
+    void merge_(std::vector<Game*>& games, size_t left, size_t mid, size_t right,
                 bool (*comparator)(const Game* lhs, const Game* rhs));
 
     /**
@@ -65,6 +65,6 @@ namespace ms {
      *     n = game vector's size
      * Stable algorithm
      */
-    void recursiveMergeSort_(std::vector<Game*>& games, int left, int right,
+    void recursiveMergeSort_(std::vector<Game*>& games, size_t left, size_t right,
                              bool (*comparator)(const Game* lhs, const Game* rhs));
 }

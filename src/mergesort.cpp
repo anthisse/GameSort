@@ -8,44 +8,44 @@ namespace ms {
         recursiveMergeSort_(games, 0, games.size() - 1, comparator);
     }
     // recursivly divide the vector
-    void recursiveMergeSort_(std::vector<Game*>& games, int left, int right,
+    void recursiveMergeSort_(std::vector<Game*>& games, const size_t left, const size_t right,
                              bool (*comparator)(const Game* lhs, const Game* rhs)) {
         // if segment is more than one
         if (left < right) {
             // calculate middle idx
-            int mid = left + (right - left) / 2;
+            const size_t mid = left + (right - left) / 2;
             recursiveMergeSort_(games, left, mid, comparator); // sort left half
             recursiveMergeSort_(games, mid + 1, right, comparator); // sort right half
             merge_(games, left, mid, right, comparator); // merge the two halves
         }
     }
 
-    void merge_(std::vector<Game*>& games, int left, int mid, int right,
+    void merge_(std::vector<Game*>& games, const size_t left, const size_t mid, const size_t right,
                 bool (*comparator)(const Game* lhs, const Game* rhs)) {
         // # of elements in the left array
-        int sizeLeft = mid - left + 1;
+        const size_t sizeLeft = mid - left + 1;
 
         // # of elements in the right array
-        int sizeRight = right - mid;
+        const size_t sizeRight = right - mid;
 
         // temp vectors for left + right arrays
         std::vector<Game*> leftGames(sizeLeft);
         std::vector<Game*> rightGames(sizeRight);
 
         // copy the data to the temp arrays
-        for (int i = 0; i < sizeLeft; i++) {
+        for (size_t i = 0; i < sizeLeft; i++) {
             leftGames[i] = games[left + i];
         }
-        for (int j = 0; j < sizeRight; j++) {
+        for (size_t j = 0; j < sizeRight; j++) {
             rightGames[j] = games[mid + 1 + j];
         }
 
         // initial idx of left + right arrays
-        int i = 0;
-        int j = 0;
+        size_t i = 0;
+        size_t j = 0;
 
         // initial idx to start merging from
-        int k = left;
+        size_t k = left;
 
         // merge temp arrays back in the original array
         while (i < sizeLeft && j < sizeRight) {
