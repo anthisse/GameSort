@@ -1,6 +1,7 @@
 #include "Game.hpp"
 
 #include <algorithm>
+#include <iostream>
 
 Game::Game(std::string title, std::vector<std::string> genres, const double score, std::string platform) {
     this->title_ = std::move(title);
@@ -39,7 +40,15 @@ bool Game::compareGenres(const Game* const lhs, const Game* const rhs) {
     if (lhs->genres_ == rhs->genres_) {
         return lhs->title_ < rhs->title_;
     }
-    return lhs->genres_ < rhs->genres_;
+    // operator< for vectors doesn't compare items one-by-one, so comparison must be done here
+    const size_t limitingSize = std::min(lhs->genres_.size(), rhs->genres_.size());
+    for (size_t i = 0; i < limitingSize; ++i) {
+        if (lhs->genres_[i] != rhs->genres_[i]) {
+            return lhs->genres_[i] < rhs->genres_[i];
+        }
+    }
+    // Shouldn't get here. Suppresses warnings.
+    return lhs->title_ < rhs->title_;
 }
 
 bool Game::comparePlatform(const Game* const lhs, const Game* const rhs) {
