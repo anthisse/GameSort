@@ -5,10 +5,8 @@
 #include <iostream>
 #include <random>
 #include <string>
-#include <unordered_set>
 
 // SFML. Graphics library.
-#include <SFML/Config.hpp>
 #include <SFML/Graphics.hpp>
 
 #include "Game.hpp"
@@ -20,11 +18,6 @@
 #include "mergesort.h"
 #include "TextureManager.h"
 #include "Title.h"
-
-class apiException final : public std::runtime_error {
-public:
-    apiException() : std::runtime_error("Moby API key missing") {}
-};
 
 void dataAnalysis(std::vector<Game*>& data);
 
@@ -362,12 +355,7 @@ std::vector<Game*> loadGames(const sf::Font& font) {
     return games;
 }
 
-int main(int argc, char** argv) {
-    printf("program path: %s\n", argv[0]);
-    const char* env_MobyKey = std::getenv("MOBY_KEY");
-    if (!env_MobyKey) {
-        throw apiException();
-    }
+int main() {
 
     sf::Font font;
     if (!font.loadFromFile("../res/font.ttf")) {
@@ -474,72 +462,6 @@ void print_stats(const std::vector<Game*>& data) {
     }
     std::cout << "Platform: " << data.back()->get_platform();
     std::cout << std::endl << std::endl;
-}
-
-void dataAnalysis(std::vector<Game*>& data) {
-    std::cout << "data size: " << data.size() << '\n';
-    using std::chrono::duration_cast;
-    using millis = std::chrono::milliseconds;
-    using clock = std::chrono::steady_clock;
-
-    std::random_device rd;
-    std::mt19937 generator(rd());
-    std::ranges::shuffle(data.begin(), data.end(), generator);
-    puts("Sorting by title then score then platform:");
-    puts("================================");
-
-    puts("Merge sorting...");
-    auto start = clock::now();
-    ms::mergeSort(data, Game::compareScores);
-    ms::mergeSort(data, Game::comparePlatform);
-    ms::mergeSort(data, Game::compareTitles);
-    auto elapsedTime = duration_cast<millis>(clock::now() - start);
-    print_stats(data);
-    printf("Merge sort took %lld millisconds.\n", elapsedTime.count());
-
-    puts("Shuffling");
-    generator();
-    std::ranges::shuffle(data.begin(), data.end(), generator);
-
-    puts("Tim sorting...");
-    start = clock::now();
-    ts::timsort(data, Game::compareScores);
-    ts::timsort(data, Game::comparePlatform);
-    ts::timsort(data, Game::compareTitles);
-
-    elapsedTime = duration_cast<millis>(clock::now() - start);
-
-    print_stats(data);
-    std::cout << "Tim sort took " << elapsedTime.count() << " milliseconds.\n";
-
-    puts("shuffling");
-    generator();
-    std::ranges::shuffle(data.begin(), data.end(), generator);
-
-    puts("============================");
-    puts("stable_sort incoming");
-    start = clock::now();
-    std::ranges::stable_sort(data.begin(), data.end(), Game::compareScores);
-    std::ranges::stable_sort(data.begin(), data.end(), Game::comparePlatform);
-    std::ranges::stable_sort(data.begin(), data.end(), Game::compareTitles);
-    elapsedTime = duration_cast<millis>(clock::now() - start);
-
-    print_stats(data);
-    std::cout << "Stablesort took " << elapsedTime.count() << "milliseconds.\n";
-
-    puts("shuffling");
-    generator();
-    std::ranges::shuffle(data.begin(), data.end(), generator);
-
-    puts("==============================");
-    puts("Insertion sorting...");
-    start = clock::now();
-    ts::binaryInsertionSort(data, Game::compareScores);
-    ts::binaryInsertionSort(data, Game::comparePlatform);
-    ts::binaryInsertionSort(data, Game::compareTitles);
-    elapsedTime = duration_cast<millis>(clock::now() - start);
-    print_stats(data);
-    std::cout << "Insertion sort took " << elapsedTime.count() << " milliseconds.\n";
 }
 
 // Ignore games that are possibly offensive
