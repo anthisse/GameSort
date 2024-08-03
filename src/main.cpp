@@ -1,8 +1,8 @@
 #include <algorithm>
 #include <chrono>
+#include <iostream>
 #include <filesystem>
 #include <fstream>
-#include <iostream>
 #include <random>
 #include <string>
 
@@ -87,17 +87,12 @@ sf::Text getLoadingWindowText(const sf::Font& font, const sf::RenderWindow& load
 }
 
 std::vector<Game*> parseJsons() {
-    using std::chrono::duration_cast;
-    using ms = std::chrono::milliseconds;
-    using clock = std::chrono::steady_clock;
-
     std::vector<std::string> blacklist;
     try {
         blacklist = getBlacklist();
     } catch (std::ifstream::failure& e) {
         std::cerr << e.what() << "\nblacklist not functional, config/blacklist.csv not found.\n";
     }
-    const auto start = clock::now();
     std::vector<Game*> games;
     // Iterate through each file and create Game objects
     const char* platformPath = "../games/platforms/jsons/";
@@ -127,7 +122,6 @@ std::vector<Game*> parseJsons() {
             }
         }
     }
-    std::cout << "Finished parsing in " << duration_cast<ms>(clock::now() - start).count() << '\n';
     return games;
 }
 
@@ -249,7 +243,6 @@ void renderMainWindow(const sf::Font& font, std::vector<Game*>& games) {
             if (event.type == sf::Event::MouseButtonPressed && mainWindow.hasFocus()) {
                 sf::Vector2i mouse = sf::Mouse::getPosition(mainWindow);
                 if (nextArrow.getGlobalBounds().contains(mainWindow.mapPixelToCoords(mouse))) {
-                    puts("next arr press, goto next page");
                     if (gameIndex + 3 < static_cast<ssize_t>(games.size())) {
                         gameIndex += 3;
                     }
@@ -261,22 +254,18 @@ void renderMainWindow(const sf::Font& font, std::vector<Game*>& games) {
                 }
                 std::string sortedField;
                 if (title.getGlobalBounds().contains(mainWindow.mapPixelToCoords(mouse))) {
-                    puts("title pressed, sort by title");
                     sortedField = "title";
                     renderSortingWindow(font, sortedField, games);
                 }
                 if (rating.getGlobalBounds().contains(mainWindow.mapPixelToCoords(mouse))) {
-                    puts("rating pressed, sort by rating");
                     sortedField = "rating";
                     renderSortingWindow(font, sortedField, games);
                 }
                 if (genre.getGlobalBounds().contains(mainWindow.mapPixelToCoords(mouse))) {
-                    puts("genre pressed, sort by genre");
                     sortedField = "genre";
                     renderSortingWindow(font, sortedField, games);
                 }
                 if (platform.getGlobalBounds().contains(mainWindow.mapPixelToCoords(mouse))) {
-                    puts("platform pressed, sort by platform");
                     sortedField = "platform";
                     renderSortingWindow(font, sortedField, games);
                 }
@@ -404,22 +393,18 @@ std::array<sf::Text, 5> getSortTimeTexts(const sf::Font& font, const sf::RenderW
 
     auto timeStart = clock::now();
     ts::timsort(games, comparator);
-    puts("timsort done");
     const long long timsortTime = (duration_cast<millis>(clock::now() - timeStart)).count();
     sf::Text timsortText;
     timsortText.setString("Timsort took " + std::to_string(timsortTime) + " milliseconds");
-    std::cout << "Timsort took " + std::to_string(timsortTime) + " milliseconds";
 
     timeStart = clock::now();
     ms::mergeSort(mergeSortGames, comparator);
-    puts("mergesort done");
     const long long mergeSortTime = (duration_cast<millis>(clock::now() - timeStart)).count();
     sf::Text mergeSortText;
     mergeSortText.setString("Merge sort took " + std::to_string(mergeSortTime) + " milliseconds");
 
     timeStart = clock::now();
     ts::binaryInsertionSort(binaryInsertionSortGames, comparator);
-    puts("BIS done");
     const long long binaryInsertionSortTime = (duration_cast<millis>(clock::now() - timeStart)).count();
     sf::Text binaryInsertionSortText;
     binaryInsertionSortText.setString(
@@ -427,7 +412,6 @@ std::array<sf::Text, 5> getSortTimeTexts(const sf::Font& font, const sf::RenderW
 
     timeStart = clock::now();
     std::ranges::stable_sort(stableSortGames.begin(), stableSortGames.end(), comparator);
-    puts("stable_sort done");
     const long long stableSortTime = (duration_cast<millis>(clock::now() - timeStart)).count();
     sf::Text stableSortText;
     stableSortText.setString("std::ranges::stable_sort took " + std::to_string(stableSortTime) + " milliseconds");
@@ -444,7 +428,6 @@ std::array<sf::Text, 5> getSortTimeTexts(const sf::Font& font, const sf::RenderW
         sortTexts[i].setPosition(static_cast<float>(sortingWindow.getSize().x) / 2.0F,
                                  200.0F + 100.0F * static_cast<float>(i));
     }
-    std::cout << "returning sortTexts\n";
     return sortTexts;
 }
 
