@@ -391,18 +391,21 @@ std::array<sf::Text, 5> getSortTimeTexts(const sf::Font& font, const sf::RenderW
 
     std::vector<Game*> mergeSortGames = games, binaryInsertionSortGames = games, stableSortGames = games;
 
+    // TIM SORT 
     auto timeStart = clock::now();
     ts::timsort(games, comparator);
     const long long timsortTime = (duration_cast<millis>(clock::now() - timeStart)).count();
     sf::Text timsortText;
     timsortText.setString("Timsort took " + std::to_string(timsortTime) + " milliseconds");
 
+    // MERGE SORT 
     timeStart = clock::now();
     ms::mergeSort(mergeSortGames, comparator);
     const long long mergeSortTime = (duration_cast<millis>(clock::now() - timeStart)).count();
     sf::Text mergeSortText;
     mergeSortText.setString("Merge sort took " + std::to_string(mergeSortTime) + " milliseconds");
 
+    // BINARY INSERTION SORT
     timeStart = clock::now();
     ts::binaryInsertionSort(binaryInsertionSortGames, comparator);
     const long long binaryInsertionSortTime = (duration_cast<millis>(clock::now() - timeStart)).count();
@@ -410,6 +413,7 @@ std::array<sf::Text, 5> getSortTimeTexts(const sf::Font& font, const sf::RenderW
     binaryInsertionSortText.setString(
         "Binary insertion sort took " + std::to_string(binaryInsertionSortTime) + " milliseconds");
 
+    // STABLE_SORT
     timeStart = clock::now();
     std::ranges::stable_sort(stableSortGames.begin(), stableSortGames.end(), comparator);
     const long long stableSortTime = (duration_cast<millis>(clock::now() - timeStart)).count();
