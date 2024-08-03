@@ -1,4 +1,4 @@
-#include "TextureManager.h"
+#include "TextureManager.hpp"
 #include <iostream> // TODO remove me
 #include <filesystem>
 

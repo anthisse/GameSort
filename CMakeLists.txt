@@ -16,11 +16,11 @@ add_executable(GameSort
         src/main.cpp
         src/Game.cpp
         src/Game.hpp
-        src/mergesort.h
+        src/mergesort.hpp
         src/mergesort.cpp
         src/timsort.hpp
         src/timsort.cpp
-        src/TextureManager.h
+        src/TextureManager.hpp
         src/TextureManager.cpp
         lib/simdjson.h
         lib/simdjson.cpp

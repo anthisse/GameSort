@@ -15,8 +15,8 @@
 // Parse json files. Provided by https://github.com/simdjson/simdjson
 #include "../lib/simdjson.h"
 #include "timsort.hpp"
-#include "mergesort.h"
-#include "TextureManager.h"
+#include "mergesort.hpp"
+#include "TextureManager.hpp"
 
 std::vector<Game*> renderLoadingWindow(const sf::Font& font);
 
