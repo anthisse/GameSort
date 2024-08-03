@@ -448,8 +448,6 @@ std::array<sf::Text, 5> getSortTimeTexts(const sf::Font& font, const sf::RenderW
     return sortTexts;
 }
 
-// TODO needs a sf::sleep to avoid hogging resources
-
 void renderSortingWindow(const sf::Font& font, const std::string& sortedField, std::vector<Game*>& games) {
     sf::RenderWindow sortingWindow(sf::VideoMode(900, 600), "GameSort", sf::Style::Close);
     sf::Color gatorBlue(0, 33, 165);
@@ -500,5 +498,6 @@ void renderSortingWindow(const sf::Font& font, const std::string& sortedField, s
             sortingWindow.draw(text);
         }
         sortingWindow.display();
+        sf::sleep(sf::seconds(1.0F / 60.0F));
     }
 }
