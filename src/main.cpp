@@ -546,8 +546,9 @@ void dataAnalysis(std::vector<Game*>& data) {
 bool isBlacklisted(const Game* game, const std::vector<std::string>& blacklist) {
     std::string lowerTitle = game->get_title();
     std::ranges::transform(lowerTitle.begin(), lowerTitle.end(), lowerTitle.begin(), tolower);
-    for (const char c : lowerTitle) {
-        if (!(c>=0 && c < 128)) {
+    for (const unsigned char c : lowerTitle) {
+        // Remove games if they contain non-ascii or control characters
+        if (c<32 || c >= 127) {
             return true;
         }
     }
