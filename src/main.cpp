@@ -14,7 +14,6 @@
 // Parse json files. Provided by https://github.com/simdjson/simdjson
 #include "../lib/simdjson.h"
 #include "timsort.hpp"
-#include "buttons.h"
 #include "mergesort.h"
 #include "TextureManager.h"
 #include "Title.h"
