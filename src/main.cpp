@@ -52,7 +52,7 @@ std::array<sf::Text, 3> getThreeTitlesText(const sf::Font& font, const std::vect
         if (title.size() >= MAX_TITLE_LENGTH) {
             title = title.substr(0, 97) + "...";
         }
-        for (size_t stringIndex = 19; stringIndex < title.size(); stringIndex += 20) {
+        for (size_t stringIndex = 24; stringIndex < title.size(); stringIndex += 25) {
             title.insert(stringIndex, "-\n");
         }
         displayedTitles[i].setString(title);
@@ -60,7 +60,7 @@ std::array<sf::Text, 3> getThreeTitlesText(const sf::Font& font, const std::vect
         displayedTitles[i].setCharacterSize(25);
         displayedTitles[i].setFillColor(sf::Color::White);
         // Casting is fine, i is always less than 3
-        displayedTitles[i].setPosition(100.0F, 145.0F + 175.0F * static_cast<float>(i));
+        displayedTitles[i].setPosition(50, 145.0F + 175.0F * static_cast<float>(i));
     }
     return displayedTitles;
 }
@@ -117,6 +117,111 @@ std::array<sf::Text, 3> getThreeRatingsText(const sf::Font& font, const std::vec
     return displayedRatings;
 }
 
+std::array<sf::Text, 5> getSortTimeTexts(const sf::Font& font, const sf::RenderWindow& sortingWindow,
+                                         std::vector<Game*>& games, bool (*comparator)(const Game*, const Game*)) {
+    using std::chrono::duration_cast;
+    using millis = std::chrono::milliseconds;
+    using clock = std::chrono::high_resolution_clock;
+
+    std::vector<Game*> mergeSortGames = games, binaryInsertionSortGames = games, stableSortGames = games;
+
+    auto timeStart = clock::now();
+    ts::timsort(games, comparator);
+    puts("timsort done");
+    const long long timsortTime = (duration_cast<millis>(clock::now() - timeStart)).count();
+    sf::Text timsortText;
+    timsortText.setString("Timsort took " + std::to_string(timsortTime) + " milliseconds");
+    std::cout << "Timsort took " + std::to_string(timsortTime) + " milliseconds";
+
+    timeStart = clock::now();
+    ms::mergeSort(mergeSortGames, comparator);
+    puts("mergesort done");
+    const long long mergeSortTime = (duration_cast<millis>(clock::now() - timeStart)).count();
+    sf::Text mergeSortText;
+    mergeSortText.setString("Merge sort took " + std::to_string(mergeSortTime) + " milliseconds");
+
+    timeStart = clock::now();
+    ts::binaryInsertionSort(binaryInsertionSortGames, comparator);
+    puts("BIS done");
+    const long long binaryInsertionSortTime = (duration_cast<millis>(clock::now() - timeStart)).count();
+    sf::Text binaryInsertionSortText;
+    binaryInsertionSortText.setString(
+        "Binary insertion sort took " + std::to_string(binaryInsertionSortTime) + " milliseconds");
+
+    timeStart = clock::now();
+    std::ranges::stable_sort(stableSortGames.begin(), stableSortGames.end(), comparator);
+    puts("stable_sort done");
+    const long long stableSortTime = (duration_cast<millis>(clock::now() - timeStart)).count();
+    sf::Text stableSortText;
+    stableSortText.setString("std::ranges::stable_sort took " + std::to_string(stableSortTime) + " milliseconds");
+
+    // Deliberately avoiding the last element, it will be overwritten by the title anyway
+    std::array<sf::Text, 5> sortTexts = {timsortText, mergeSortText, binaryInsertionSortText, stableSortText};
+    // Set up the text attributes for the array
+    for (size_t i = 0; i < sortTexts.size(); ++i) {
+        sortTexts[i].setFont(font);
+        sortTexts[i].setCharacterSize(30);
+        sortTexts[i].setFillColor(sf::Color::White);
+        const sf::FloatRect textRect = sortTexts[i].getLocalBounds();
+        sortTexts[i].setOrigin(textRect.left + textRect.width / 2.0f, textRect.top + textRect.height / 2.0f);
+        sortTexts[i].setPosition(static_cast<float>(sortingWindow.getSize().x) / 2.0F,
+                                 200.0F + 100.0F * static_cast<float>(i));
+    }
+    std::cout << "returning sortTexts\n";
+    return sortTexts;
+}
+
+void renderSortingWindow(const sf::Font& font, const std::string& sortedField, std::vector<Game*>& games) {
+    sf::RenderWindow sortingWindow(sf::VideoMode(900, 600), "GameSort", sf::Style::Close);
+    sf::Color gatorBlue(0, 33, 165);
+    sortingWindow.setMouseCursorVisible(true);
+    sortingWindow.setKeyRepeatEnabled(true);
+    sf::Text sortingText;
+    sortingText.setString("Sorting by " + sortedField + "...");
+    sortingText.setFont(font);
+    sortingText.setCharacterSize(50);
+    sortingText.setStyle(sf::Text::Bold | sf::Text::Italic);
+    sortingText.setFillColor(sf::Color::White);
+
+    const sf::FloatRect textRect = sortingText.getLocalBounds();
+    sortingText.setOrigin(textRect.left + textRect.width / 2.0f, textRect.top + textRect.height / 2.0f);
+    sortingText.setPosition(static_cast<float>(sortingWindow.getSize().x) / 2.0f,
+                            static_cast<float>(sortingWindow.getSize().y) / 2.0f);
+    sortingWindow.clear(gatorBlue);
+    sortingWindow.draw(sortingText);
+    sortingWindow.display();
+
+    // To keep the timing fair, pass a different vector to each sort
+    // Timsort gets the original vector for no particular reason
+    std::vector<Game*> mergeSortGames = games, binaryInsertionSortGames = games, stableSortGames = games;
+    std::array<sf::Text, 5> sortingWindowTexts;
+    if (sortedField == "title") {
+        sortingWindowTexts = getSortTimeTexts(font, sortingWindow, games, Game::compareTitles);
+    }
+
+    sf::Text garbage;
+    sortingWindowTexts[4] = garbage;
+    sortingWindow.clear(gatorBlue);
+    for (const auto& text : sortingWindowTexts) {
+        std::cout << "drawing a text\n";
+        sortingWindow.draw(text);
+    }
+    sortingWindow.display();
+
+    while (sortingWindow.isOpen()) {
+        sf::Event event{};
+        while (sortingWindow.pollEvent(event)) {
+            if (event.type == sf::Event::Closed) {
+                sortingWindow.close();
+                return;
+            }
+            if (event.type == sf::Event::LostFocus) {
+                sortingWindow.requestFocus();
+            }
+        }
+    }
+}
+
 void renderMainWindow(const sf::Font& font, std::vector<Game*>& games) {
     // Shuffle the data to start to ensure a good spread
     std::random_device rd;
@@ -149,6 +254,8 @@ void renderMainWindow(const sf::Font& font, std::vector<Game*>& games) {
     sf::Sprite genre = getSprite(textureManager->getTexture("genreButton"), 1400, 345, 0.13, 0.13);
     sf::Sprite platform = getSprite(textureManager->getTexture("platformButton"), 1400, 445, 0.13, 0.13);
 
+    // Ff the stats window is open, flush event queue by polling everything out
+    bool isStatsWindowOpen = false;
     // Event-based loop
     while (mainWindow.isOpen()) {
         sf::Event event{};
@@ -164,7 +271,7 @@ void renderMainWindow(const sf::Font& font, std::vector<Game*>& games) {
                 std::exit(0);
             }
             // If left mouse button pressed, check what was clicked
-            if (event.type == sf::Event::MouseButtonPressed) {
+            if (event.type == sf::Event::MouseButtonPressed && mainWindow.hasFocus()) {
                 sf::Vector2i mouse = sf::Mouse::getPosition(mainWindow);
                 if (nextArrow.getGlobalBounds().contains(mainWindow.mapPixelToCoords(mouse))) {
                     puts("next arr press, goto next page");
@@ -173,13 +280,16 @@ void renderMainWindow(const sf::Font& font, std::vector<Game*>& games) {
                     }
                 }
                 if (prevArrow.getGlobalBounds().contains(mainWindow.mapPixelToCoords(mouse))) {
-                    printf("current game index: %llu\n", gameIndex);
                     if (gameIndex - 3 >= 0) {
                         gameIndex -= 3;
                     }
                 }
+
+                std::string sortedField;
                 if (title.getGlobalBounds().contains(mainWindow.mapPixelToCoords(mouse))) {
                     puts("title pressed, sort by title");
+                    sortedField = "title";
+                    renderSortingWindow(font, sortedField, games);
                 }
                 if (rating.getGlobalBounds().contains(mainWindow.mapPixelToCoords(mouse))) {
                     puts("rating pressed, sort by rating");
@@ -213,8 +323,6 @@ void renderMainWindow(const sf::Font& font, std::vector<Game*>& games) {
         for (const auto& titleText : displayedTitles) {
             mainWindow.draw(titleText);
         }
-
-
         mainWindow.display();
         // Lock framerate to 60 to avoid high CPU consumption
         sf::sleep(sf::seconds(1.0F / 60.0F));
@@ -222,7 +330,7 @@ void renderMainWindow(const sf::Font& font, std::vector<Game*>& games) {
 }
 
 
-sf::Text getLoadingText(const sf::Font& font, const sf::RenderWindow& loadingWindow) {
+sf::Text getLoadingWindowText(const sf::Font& font, const sf::RenderWindow& loadingWindow) {
     sf::Text text;
     text.setString("Parsing jsons...");
     text.setFont(font);
@@ -240,7 +348,7 @@ sf::Text getLoadingText(const sf::Font& font, const sf::RenderWindow& loadingWin
 std::vector<Game*> loadGames(const sf::Font& font) {
     sf::RenderWindow loadingWindow(sf::VideoMode(900, 450), "GameSort", sf::Style::Close);
     loadingWindow.setMouseCursorVisible(true);
-    sf::Text text = getLoadingText(font, loadingWindow);
+    sf::Text text = getLoadingWindowText(font, loadingWindow);
     loadingWindow.clear(sf::Color(0, 33, 165));
     loadingWindow.draw(text);
     loadingWindow.display();
