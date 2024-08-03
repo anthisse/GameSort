@@ -1,5 +1,4 @@
-#ifndef TIMSORT_H
-#define TIMSORT_H
+#pragma once
 
 #include <vector>
 #include "Game.hpp"
@@ -88,5 +87,3 @@ namespace ts {
      */
     void timsort(std::vector<Game*>& games, bool (*comparator)(const Game* lhs, const Game* rhs));
 }
-
-#endif //TIMSORT_H

@@ -2,8 +2,6 @@
 #include <vector>
 #include "Game.hpp"
 
-#include <iostream>
-
 namespace ms {
 	// this functions starts the recursive merge sort
 	void mergeSort(std::vector<Game*>& games, bool(*comparator)(const Game* lhs, const Game* rhs));

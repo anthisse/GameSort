@@ -26,7 +26,8 @@ std::vector<std::string> getGenres(simdjson::simdjson_result<simdjson::ondemand:
 
 bool isBlacklisted(const Game* game, const std::vector<std::string>& blacklist);
 
-sf::Sprite getSprite(sf::Texture& texture, float xPos, float yPos, float xScale, float yScale) {
+sf::Sprite getSprite(const sf::Texture& texture, const float xPos, float const yPos,
+    float const xScale, float const yScale) {
     sf::Sprite sprite;
     sprite.setTexture(texture);
     // Scale the sprite so that it fits nicely on the screen and set its position

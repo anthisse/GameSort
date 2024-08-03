@@ -45,14 +45,6 @@ sf::Texture& TextureManager::getTexture(const std::string& textureName) {
     return textures.at(textureName);
 }
 
-std::unordered_map<std::string, sf::Texture>::const_iterator TextureManager::cbegin() {
-    return textures.cbegin();
-}
-
-std::unordered_map<std::string, sf::Texture>::const_iterator TextureManager::cend() {
-    return textures.cend();
-}
-
 TextureManager::~TextureManager() {
     textures.clear();
 }

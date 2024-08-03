@@ -1,5 +1,4 @@
-#ifndef GAME_H
-#define GAME_H
+#pragma once
 
 #include <string>
 #include <vector>
@@ -12,19 +11,11 @@ public:
 
     [[nodiscard("Getter")]] std::string get_title() const;
 
-    void set_title(std::string title);
-
     [[nodiscard("Getter")]] std::vector<std::string> get_genres() const;
-
-    void set_genres(std::vector<std::string> genres);
 
     [[nodiscard("Getter")]] double get_score() const;
 
-    void set_score(double score);
-
     [[nodiscard("Getter")]] std::string get_platform() const;
-
-    void set_platform(std::string platform);
 
     // Memory address is compared to resolve ties
     static bool compareTitles(const Game* lhs, const Game* rhs);
@@ -41,6 +32,3 @@ private:
     double score_ = 0.0F;
     std::string platform_;
 };
-
-
-#endif //GAME_H

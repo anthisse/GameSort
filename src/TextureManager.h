@@ -22,10 +22,6 @@ public:
 
     sf::Texture& getTexture(const std::string& textureName);
 
-    std::unordered_map<std::string, sf::Texture>::const_iterator cbegin();
-
-    std::unordered_map<std::string, sf::Texture>::const_iterator cend();
-
     ~TextureManager();
 
 private:
