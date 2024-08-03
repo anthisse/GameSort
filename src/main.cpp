@@ -460,8 +460,9 @@ void renderSortingWindow(const sf::Font& font, const std::string& sortedField, s
     sortingText.setStyle(sf::Text::Bold | sf::Text::Italic);
     sortingText.setFillColor(sf::Color::White);
 
-    const sf::FloatRect textRect = sortingText.getLocalBounds();
-    sortingText.setOrigin(textRect.left + textRect.width / 2.0F, textRect.top + textRect.height / 2.0F);
+    const sf::FloatRect sortingTextRect = sortingText.getLocalBounds();
+    sortingText.setOrigin(sortingTextRect.left + sortingTextRect.width / 2.0F,
+                          sortingTextRect.top + sortingTextRect.height / 2.0F);
     sortingText.setPosition(static_cast<float>(sortingWindow.getSize().x) / 2.0F,
                             static_cast<float>(sortingWindow.getSize().y) / 2.0F);
     sortingWindow.clear(gatorBlue);
@@ -481,6 +482,18 @@ void renderSortingWindow(const sf::Font& font, const std::string& sortedField, s
     } else {
         sortingWindowTexts = getSortTimeTexts(font, sortingWindow, games, Game::comparePlatform);
     }
+
+    sf::Text headerText;
+    headerText.setString("Sort completed! Stats:");
+    headerText.setFont(font);
+    headerText.setCharacterSize(50);
+    headerText.setStyle(sf::Text::Bold);
+    headerText.setFillColor(sf::Color::White);
+    const sf::FloatRect headerTextRect = headerText.getLocalBounds();
+    headerText.setOrigin(headerTextRect.left + headerTextRect.width / 2.0F,
+                         headerTextRect.top + headerTextRect.height / 2.0F);
+    headerText.setPosition(static_cast<float>(sortingWindow.getSize().x) / 2.0F, 100.0F);
+    sortingWindowTexts[4] = headerText;
 
     while (sortingWindow.isOpen()) {
         sf::Event event{};
