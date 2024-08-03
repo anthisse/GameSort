@@ -216,6 +216,11 @@ void renderSortingWindow(const sf::Font& font, const std::string& sortedField, s
                 sortingWindow.requestFocus();
             }
         }
+        sortingWindow.clear(gatorBlue);
+        for (const auto& text : sortingWindowTexts) {
+            sortingWindow.draw(text);
+        }
+        sortingWindow.display();
     }
 }
 
