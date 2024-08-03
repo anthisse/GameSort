@@ -22,10 +22,6 @@ add_executable(GameSort
         src/timsort.cpp
         src/TextureManager.h
         src/TextureManager.cpp
-        src/buttons.h
-        src/buttons.cpp
-        src/Title.h
-        src/Title.cpp
         lib/simdjson.h
         lib/simdjson.cpp
 )

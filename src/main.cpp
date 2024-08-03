@@ -16,7 +16,6 @@
 #include "timsort.hpp"
 #include "mergesort.h"
 #include "TextureManager.h"
-#include "Title.h"
 
 void dataAnalysis(std::vector<Game*>& data);
 
@@ -27,12 +26,12 @@ std::vector<std::string> getGenres(simdjson::simdjson_result<simdjson::ondemand:
 bool isBlacklisted(const Game* game, const std::vector<std::string>& blacklist);
 
 sf::Sprite getSprite(const sf::Texture& texture, const float xPos, float const yPos,
-    float const xScale, float const yScale) {
+                     float const xScale, float const yScale) {
     sf::Sprite sprite;
     sprite.setTexture(texture);
     // Scale the sprite so that it fits nicely on the screen and set its position
     sprite.setScale(xScale, yScale);
-    sprite.setOrigin(static_cast<float>(texture.getSize().x) / 2.0f, static_cast<float>(texture.getSize().y) / 2.0f);
+    sprite.setOrigin(static_cast<float>(texture.getSize().x) / 2.0F, static_cast<float>(texture.getSize().y) / 2.0F);
     sprite.setPosition(xPos, yPos);
     return sprite;
 }
@@ -156,7 +155,7 @@ std::array<sf::Text, 5> getSortTimeTexts(const sf::Font& font, const sf::RenderW
         sortTexts[i].setCharacterSize(30);
         sortTexts[i].setFillColor(sf::Color::White);
         const sf::FloatRect textRect = sortTexts[i].getLocalBounds();
-        sortTexts[i].setOrigin(textRect.left + textRect.width / 2.0f, textRect.top + textRect.height / 2.0f);
+        sortTexts[i].setOrigin(textRect.left + textRect.width / 2.0F, textRect.top + textRect.height / 2.0F);
         sortTexts[i].setPosition(static_cast<float>(sortingWindow.getSize().x) / 2.0F,
                                  200.0F + 100.0F * static_cast<float>(i));
     }
@@ -177,9 +176,9 @@ void renderSortingWindow(const sf::Font& font, const std::string& sortedField, s
     sortingText.setFillColor(sf::Color::White);
 
     const sf::FloatRect textRect = sortingText.getLocalBounds();
-    sortingText.setOrigin(textRect.left + textRect.width / 2.0f, textRect.top + textRect.height / 2.0f);
-    sortingText.setPosition(static_cast<float>(sortingWindow.getSize().x) / 2.0f,
-                            static_cast<float>(sortingWindow.getSize().y) / 2.0f);
+    sortingText.setOrigin(textRect.left + textRect.width / 2.0F, textRect.top + textRect.height / 2.0F);
+    sortingText.setPosition(static_cast<float>(sortingWindow.getSize().x) / 2.0F,
+                            static_cast<float>(sortingWindow.getSize().y) / 2.0F);
     sortingWindow.clear(gatorBlue);
     sortingWindow.draw(sortingText);
     sortingWindow.display();
@@ -235,10 +234,28 @@ void renderMainWindow(const sf::Font& font, std::vector<Game*>& games) {
     mainWindow.setKeyRepeatEnabled(true);
 
     // Get headers
-    Text welcomeText("Game Sort", font, 35, sf::Text::Underlined, sf::Text::Bold, sf::Color::White,
-                     sf::Vector2f(250 / 2.0f, (380 / 2.0f) - 150));
-    Text sortGamesText("Order by:", font, 28, sf::Text::Underlined, sf::Text::Bold, sf::Color::White,
-                       sf::Vector2f(1400, (420 / 2.0f) - 150));
+    sf::Text welcomeText, sortGamesText;
+
+    welcomeText.setString("Game Sort");
+    welcomeText.setFont(font);
+    welcomeText.setCharacterSize(35);
+    welcomeText.setStyle(sf::Text::Underlined | sf::Text::Bold);
+    welcomeText.setFillColor(sf::Color::White);
+    sf::FloatRect welcomeTextRect = welcomeText.getLocalBounds();
+    welcomeText.setOrigin(welcomeTextRect.left + welcomeTextRect.width / 2.0F,
+                          welcomeTextRect.top + welcomeTextRect.height / 2.0F);
+    welcomeText.setPosition(250.0F / 2.0F, 380.0F / 2.0F - 150.0F);
+
+    sortGamesText.setString("Order by:");
+    sortGamesText.setFont(font);
+    sortGamesText.setCharacterSize(28);
+    sortGamesText.setStyle(sf::Text::Underlined | sf::Text::Bold);
+    sortGamesText.setFillColor(sf::Color::White);
+    sf::FloatRect sortGamesTextRect = sortGamesText.getLocalBounds();
+    sortGamesText.setOrigin(sortGamesTextRect.left + sortGamesTextRect.width / 2.0F,
+                      sortGamesTextRect.top + sortGamesTextRect.height / 2.0F);
+    sortGamesText.setPosition(1400.0F, 420.0F / 2.0F - 150.0F);
+
 
     // Point the singleton texture manager to the resource directory to get the textures and set the sprites
     TextureManager* textureManager = TextureManager::getInstance("../res");
@@ -307,8 +324,8 @@ void renderMainWindow(const sf::Font& font, std::vector<Game*>& games) {
         mainWindow.draw(platform);
         mainWindow.draw(nextArrow);
         mainWindow.draw(prevArrow);
-        mainWindow.draw(welcomeText.getText());
-        mainWindow.draw(sortGamesText.getText());
+        mainWindow.draw(welcomeText);
+        mainWindow.draw(sortGamesText);
         for (const auto& genreText : displayedGenres) {
             mainWindow.draw(genreText);
         }
@@ -337,9 +354,9 @@ sf::Text getLoadingWindowText(const sf::Font& font, const sf::RenderWindow& load
     text.setFillColor(sf::Color::White);
 
     const sf::FloatRect textRect = text.getLocalBounds();
-    text.setOrigin(textRect.left + textRect.width / 2.0f, textRect.top + textRect.height / 2.0f);
-    text.setPosition(static_cast<float>(loadingWindow.getSize().x) / 2.0f,
-                     static_cast<float>(loadingWindow.getSize().y) / 2.0f);
+    text.setOrigin(textRect.left + textRect.width / 2.0F, textRect.top + textRect.height / 2.0F);
+    text.setPosition(static_cast<float>(loadingWindow.getSize().x) / 2.0F,
+                     static_cast<float>(loadingWindow.getSize().y) / 2.0F);
     return text;
 }
 
