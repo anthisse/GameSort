@@ -193,9 +193,9 @@ void renderSortingWindow(const sf::Font& font, const std::string& sortedField, s
     } else if (sortedField == "rating") {
         sortingWindowTexts = getSortTimeTexts(font, sortingWindow, games, Game::compareScores);
     } else if (sortedField == "genre") {
-        getSortTimeTexts(font, sortingWindow, games, Game::compareGenres);
+        sortingWindowTexts = getSortTimeTexts(font, sortingWindow, games, Game::compareGenres);
     } else {
-        getSortTimeTexts(font, sortingWindow, games, Game::comparePlatform);
+        sortingWindowTexts = getSortTimeTexts(font, sortingWindow, games, Game::comparePlatform);
     }
 
     while (sortingWindow.isOpen()) {
@@ -356,7 +356,6 @@ std::vector<Game*> loadGames(const sf::Font& font) {
 }
 
 int main() {
-
     sf::Font font;
     if (!font.loadFromFile("../res/font.ttf")) {
         throw (std::runtime_error("unable to load font, aborting!"));
@@ -470,7 +469,7 @@ bool isBlacklisted(const Game* game, const std::vector<std::string>& blacklist) 
     std::ranges::transform(lowerTitle.begin(), lowerTitle.end(), lowerTitle.begin(), tolower);
     for (const unsigned char c : lowerTitle) {
         // Remove games if they contain non-ascii or control characters
-        if (c<32 || c >= 127) {
+        if (c < 32 || c >= 127) {
             return true;
         }
     }
