@@ -545,7 +545,12 @@ void dataAnalysis(std::vector<Game*>& data) {
 // Ignore games that are possibly offensive
 bool isBlacklisted(const Game* game, const std::vector<std::string>& blacklist) {
     std::string lowerTitle = game->get_title();
-    std::ranges::transform(lowerTitle.begin(), lowerTitle.end(), lowerTitle.begin(), ::tolower);
+    std::ranges::transform(lowerTitle.begin(), lowerTitle.end(), lowerTitle.begin(), tolower);
+    for (const char c : lowerTitle) {
+        if (!(c>=0 && c < 128)) {
+            return true;
+        }
+    }
     for (const auto& word : blacklist) {
         if (game->get_title().find(word) != std::string::npos) {
             return true;
