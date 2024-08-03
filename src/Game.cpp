@@ -58,5 +58,6 @@ bool Game::compareScores(const Game* const lhs, const Game* const rhs) {
     if (lhs->score_ == rhs->score_) {
         return lhs->title_ < rhs->title_;
     }
-    return (lhs->score_ < rhs->score_);
+    // Reversed, will now return higher scores first
+    return (lhs->score_ > rhs->score_);
 }
