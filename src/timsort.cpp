@@ -33,30 +33,30 @@ namespace ts {
                 leftIndex++;
             } else {
                 mainVector[main_index] = rightSlice[rightIndex];
-                rightIndex++;
+                ++rightIndex;
             }
-            main_index++;
+            ++main_index;
         }
 
         // Copy remaining elements of the vectors, if there are any
         while (leftIndex < leftSlice.size()) {
             mainVector[main_index] = leftSlice[leftIndex];
-            leftIndex++;
-            main_index++;
+            ++leftIndex;
+            ++main_index;
         }
         while (rightIndex < rightSlice.size()) {
             mainVector[main_index] = rightSlice[rightIndex];
-            rightIndex++;
-            main_index++;
+            ++rightIndex;
+            ++main_index;
         }
     }
 
     // Technically an introspective merge/insertion sort, but it's essentially a simplified timsort (no gallop)
     void timsort(std::vector<Game*>& games, bool (*comparator)(const Game* lhs, const Game* rhs)) {
-        // Minimum size of a run. 256 is an arbitrary value, but it seems to work well
-        // Cast to ssize_t when using iterators to avoid narrowing conversion warnings when adding offsets
-        // This is fine, since ssize_t is equal in size to long long int, which has an upper limit of 2^64 - 1
-        constexpr ssize_t RUN_SIZE = 256;
+        // Minimum size of a run. 512 is an arbitrary value, but it seems to work well
+        // Cast to ssize_t when using iterators to resolve narrowing conversion warnings when adding offsets
+        // This is fine, since ssize_t is equal in size to long long int
+        constexpr ssize_t RUN_SIZE = 512;
 
         const ssize_t gameSize = static_cast<ssize_t>(games.size()); // NOLINT(*-use-auto)
         // Sort individual vector slices

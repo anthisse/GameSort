@@ -1,5 +1,4 @@
 #include "TextureManager.hpp"
-#include <iostream> // TODO remove me
 #include <filesystem>
 
 TextureManager* TextureManager::instance = nullptr;
@@ -19,10 +18,8 @@ void TextureManager::loadTextures(const std::string& texturePath) {
     const std::filesystem::recursive_directory_iterator iter(texturePath);
     for (const auto& file : iter) {
         if (file.is_regular_file() && (file.path().extension() == ".png" || file.path().extension() == ".jpg")) {
-            std::cout << "Found image/texture " << file.path().filename() << "\n";
             sf::Texture texture;
             if (!texture.loadFromFile(file.path().string())) {
-                std::cerr << "Loading image" << file.path() << " failed\n";
                 continue;
             }
             textures.emplace(file.path().filename().replace_extension().string(), texture);

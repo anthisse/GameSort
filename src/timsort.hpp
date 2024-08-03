@@ -26,6 +26,7 @@ namespace ts {
      * sort small slices of a std::vector with little overhead.
      *
      * Average computational complexity: O(n^2)
+     *     n = games vector's size
      * Average space complexity: O(1)
      * Stable algorithm
     */
@@ -50,8 +51,10 @@ namespace ts {
      * This is used in the final timsort algorithm to sew together the
      * small slices that were sorted by binaryInsertionSort.
      *
-     * Average computational complexity: O(n)
-     * Average space complexity: O(n) (slices duplicated from main vector)
+     * Average computational complexity: O(n + m)
+     *     n = leftSlice's size and m = rightSlice's size
+     * Average space complexity: O(n + m)
+     *     n = leftSlice's size and m = rightSlice's size
      * Stable algorithm
      */
     void merge_(const std::vector<Game*>& leftSlice, const std::vector<Game*>& rightSlice,
@@ -71,7 +74,7 @@ namespace ts {
      * would use is not present. Thus, this is probably more accurately named,
      * "introspective merge sort."
      *
-     * The function slices the games vector into 64 element "slices" and
+     * The function slices the games vector into 512 element "slices" and
      * uses binary insertion sort to quickly sort each of them. It then
      * iteratively merges each of the slices together to obtain a sorted
      * vector of game pointers.
@@ -81,6 +84,7 @@ namespace ts {
      * and std::stable_sort work.
      *
      * Average computational complexity: O(n log(n))
+     *     n = games vector's size
      * The log(n) comes from the repeated division of the main vector
      * Average space complexity: O(n) (slices duplicated from main vector)
      * Stable algorithm
