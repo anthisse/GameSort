@@ -197,16 +197,13 @@ void renderSortingWindow(const sf::Font& font, const std::string& sortedField, s
     std::array<sf::Text, 5> sortingWindowTexts;
     if (sortedField == "title") {
         sortingWindowTexts = getSortTimeTexts(font, sortingWindow, games, Game::compareTitles);
+    } else if (sortedField == "rating") {
+        sortingWindowTexts = getSortTimeTexts(font, sortingWindow, games, Game::compareScores);
+    } else if (sortedField == "genre") {
+        getSortTimeTexts(font, sortingWindow, games, Game::compareGenres);
+    } else {
+        getSortTimeTexts(font, sortingWindow, games, Game::comparePlatform);
     }
-
-    sf::Text garbage;
-    sortingWindowTexts[4] = garbage;
-    sortingWindow.clear(gatorBlue);
-    for (const auto& text : sortingWindowTexts) {
-        std::cout << "drawing a text\n";
-        sortingWindow.draw(text);
-    }
-    sortingWindow.display();
 
     while (sortingWindow.isOpen()) {
         sf::Event event{};
@@ -254,8 +251,6 @@ void renderMainWindow(const sf::Font& font, std::vector<Game*>& games) {
     sf::Sprite genre = getSprite(textureManager->getTexture("genreButton"), 1400, 345, 0.13, 0.13);
     sf::Sprite platform = getSprite(textureManager->getTexture("platformButton"), 1400, 445, 0.13, 0.13);
 
-    // Ff the stats window is open, flush event queue by polling everything out
-    bool isStatsWindowOpen = false;
     // Event-based loop
     while (mainWindow.isOpen()) {
         sf::Event event{};
@@ -284,7 +279,6 @@ void renderMainWindow(const sf::Font& font, std::vector<Game*>& games) {
                         gameIndex -= 3;
                     }
                 }
-
                 std::string sortedField;
                 if (title.getGlobalBounds().contains(mainWindow.mapPixelToCoords(mouse))) {
                     puts("title pressed, sort by title");
@@ -293,12 +287,18 @@ void renderMainWindow(const sf::Font& font, std::vector<Game*>& games) {
                 }
                 if (rating.getGlobalBounds().contains(mainWindow.mapPixelToCoords(mouse))) {
                     puts("rating pressed, sort by rating");
+                    sortedField = "rating";
+                    renderSortingWindow(font, sortedField, games);
                 }
                 if (genre.getGlobalBounds().contains(mainWindow.mapPixelToCoords(mouse))) {
                     puts("genre pressed, sort by genre");
+                    sortedField = "genre";
+                    renderSortingWindow(font, sortedField, games);
                 }
                 if (platform.getGlobalBounds().contains(mainWindow.mapPixelToCoords(mouse))) {
                     puts("platform pressed, sort by platform");
+                    sortedField = "platform";
+                    renderSortingWindow(font, sortedField, games);
                 }
             }
         }
