@@ -30,14 +30,6 @@ void TextureManager::loadTextures(const std::string& texturePath) {
     }
 }
 
-sf::Texture& TextureManager::operator[](const std::string& textureName) {
-    return getTexture(textureName);
-}
-
-sf::Texture& TextureManager::operator[](const char textureName[]) {
-    return getTexture(textureName);
-}
-
 sf::Texture& TextureManager::getTexture(const std::string& textureName) {
     return textures.at(textureName);
 }

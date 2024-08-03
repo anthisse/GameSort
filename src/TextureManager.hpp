@@ -10,17 +10,15 @@ public:
 
     TextureManager(TextureManager&& rhs) = delete;
 
+
     void operator=(const TextureManager& rhs) = delete;
 
     void operator=(const TextureManager&& rhs) = delete;
 
+    sf::Texture& getTexture(const std::string& textureName);
+
     static TextureManager* getInstance(const std::string& directoryPath);
 
-    sf::Texture& operator[](const std::string& textureName);
-
-    sf::Texture& operator[](const char textureName[]);
-
-    sf::Texture& getTexture(const std::string& textureName);
 
     ~TextureManager();
 
