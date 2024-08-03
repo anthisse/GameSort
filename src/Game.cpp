@@ -8,6 +8,8 @@ Game::Game(std::string title, std::vector<std::string> genres, const double scor
     this->genres_ = std::move(genres);
     this->score_ = score;
     this->platform_ = std::move(platform);
+    // Sort the genres to be in alphabetical order when displayed
+    std::ranges::sort(genres_.begin(), genres_.end());
 }
 
 std::string Game::get_title() const {
@@ -39,6 +41,12 @@ bool Game::compareTitles(const Game* lhs, const Game* rhs) {
 bool Game::compareGenres(const Game* const lhs, const Game* const rhs) {
     if (lhs->genres_ == rhs->genres_) {
         return lhs->title_ < rhs->title_;
+    }
+    if (lhs->genres_.empty()) {
+        return true;
+    }
+    if (rhs->genres_.empty()) {
+        return false;
     }
     // operator< for vectors doesn't compare items one-by-one, so comparison must be done here
     const size_t limitingSize = std::min(lhs->genres_.size(), rhs->genres_.size());

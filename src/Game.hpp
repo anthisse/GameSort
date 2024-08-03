@@ -4,10 +4,9 @@
 #include <string>
 #include <vector>
 
-// TODO Blacklist games that have certain NSFW keywords in their genres and titles
 class Game {
 public:
-    Game() = default;
+    Game() = delete;
 
     Game(std::string title, std::vector<std::string> genres, double score, std::string platform);
 
