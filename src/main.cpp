@@ -73,7 +73,7 @@ std::vector<Game*> renderLoadingWindow(const sf::Font& font) {
 
 sf::Text getLoadingWindowText(const sf::Font& font, const sf::RenderWindow& loadingWindow) {
     sf::Text text;
-    text.setString("Parsing jsons...");
+    text.setString("Parsing data...");
     text.setFont(font);
     text.setCharacterSize(50);
     text.setStyle(sf::Text::Bold | sf::Text::Italic);
