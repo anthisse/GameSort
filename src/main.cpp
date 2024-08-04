@@ -122,6 +122,7 @@ std::vector<Game*> parseJsons() {
             }
         }
     }
+    printf("number of games: %llu\n", games.size());
     return games;
 }
 

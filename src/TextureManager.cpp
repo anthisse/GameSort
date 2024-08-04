@@ -1,13 +1,13 @@
 #include "TextureManager.hpp"
 #include <filesystem>
 
-TextureManager* TextureManager::instance = nullptr;
+TextureManager* TextureManager::instance_ = nullptr;
 
 TextureManager* TextureManager::getInstance(const std::string& directoryPath) {
-    if (!instance) {
-        instance = new TextureManager(directoryPath);
+    if (!instance_) {
+        instance_ = new TextureManager(directoryPath);
     }
-    return instance;
+    return instance_;
 }
 
 TextureManager::TextureManager(const std::string& directoryPath) {
@@ -37,4 +37,3 @@ sf::Texture& TextureManager::getTexture(const std::string& textureName) {
 TextureManager::~TextureManager() {
     textures.clear();
 }
-
