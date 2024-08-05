@@ -36,4 +36,6 @@ sf::Texture& TextureManager::getTexture(const std::string& textureName) {
 
 TextureManager::~TextureManager() {
     textures.clear();
+    delete instance_;
+    instance_ = nullptr;
 }
