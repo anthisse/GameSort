@@ -63,7 +63,7 @@ namespace ts {
         // This is fine, since size_t is equal in size to long long int
         constexpr size_t RUN_SIZE = 512;
 
-        const size_t gameSize = static_cast<size_t>(games.size()); // NOLINT(*-use-auto)
+        const size_t gameSize = (games.size()); // NOLINT(*-use-auto)
         // Sort individual vector slices
         for (size_t i = 0; i < gameSize; i += RUN_SIZE) {
             std::vector slice(games.cbegin() + static_cast<long long>(i),
