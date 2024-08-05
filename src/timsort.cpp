@@ -4,7 +4,6 @@
 #include "timsort.hpp"
 
 namespace ts {
-
     // All instances of static_cast<long long> are fine, as our data will never be larger than 500,000 elements.
     // long long can represent at least 9,223,372,036,854,775,807.
     void binaryInsertionSort(std::vector<Game*>& games, bool (*comparator)(const Game* lhs, const Game* rhs)) {

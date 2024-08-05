@@ -53,8 +53,7 @@ namespace ts {
      *
      * Average computational complexity: O(n + m)
      *     n = leftSlice's size and m = rightSlice's size
-     * Average space complexity: O(n + m)
-     *     n = leftSlice's size and m = rightSlice's size
+     * Average space complexity: O(1) (slices are declared in ts::timsort)
      * Stable algorithm
      */
     void merge_(const std::vector<Game*>& leftSlice, const std::vector<Game*>& rightSlice,

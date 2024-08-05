@@ -165,6 +165,7 @@ bool isBlacklisted(const Game* game, const std::vector<std::string>& blacklist) 
             return true;
         }
     }
+
     for (const auto& word : blacklist) {
         if (game->get_title().find(word) != std::string::npos) {
             return true;
